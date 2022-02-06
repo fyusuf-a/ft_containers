@@ -18,7 +18,24 @@ class Vector {
 		typedef const value_type& const_reference;
 		typedef typename Allocator::pointer pointer;
 		typedef typename Allocator::const_pointer const_pointer;
+
+		Vector();
+		Vector(const Allocator& alloc);
+		explicit Vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator())
+			: m_allocator(alloc)
+			, m_official_size(count)
+			, m_true_size(FT_VECTOR_INITIAL_SIZE)
+		{
+			while (m_true_size < m_official_size)
+				m_true_size *= 2;
+			m_p = m_allocator.allocate(m_true_size);
+			// TODO : use iterators
+			for (size_type i = 0; i < m_official_size; i++)
+				m_p[i] = value;
+		}
+		~Vector();
 	private:
+		Allocator	m_allocator;
 		size_type	m_official_size;
 		size_type	m_true_size;
 		pointer 	m_p;

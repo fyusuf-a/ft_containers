@@ -3,21 +3,29 @@
 
 #include "IOIterator.hpp"
 
-namespace ft::IOIterator {
+namespace ft {
 
-IOIterator() {
+template<typename T>
+IOIterator<T>::IOIterator() {
 }
 
-~IOIterator()
-
-IOIterator(const IOIterator&) {
+template<typename T>
+IOIterator<T>::~IOIterator() {
 }
 
-IOIterator& operator=(const IOIterator&) {
+template<typename T>
+IOIterator<T>::IOIterator(const IOIterator&) {
 }
 
-bool operator!=(const IOIterator& other) {
+template<typename T>
+IOIterator<T>::IOIterator& operator=(const IOIterator&) {
+}
+
+template<typename T>
+bool IOIterator<T>::operator!=(const IOIterator& other) {
 	return !operator==(other);
+}
+
 }
 
 #endif
