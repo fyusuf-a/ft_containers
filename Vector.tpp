@@ -26,4 +26,9 @@ ft::Vector<T, Allocator>::Vector(const Allocator& alloc)
 {
 }
 
+template<typename T, class Allocator>
+ft::Vector<T, Allocator>::Vector(const Vector& other)
+{
+}
+
 #endif

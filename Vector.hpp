@@ -18,6 +18,8 @@ class Vector {
 		typedef const value_type& const_reference;
 		typedef typename Allocator::pointer pointer;
 		typedef typename Allocator::const_pointer const_pointer;
+		typedef pointer iterator;
+		typedef const_pointer const_iterator;
 
 		Vector();
 		Vector(const Allocator& alloc);
@@ -33,12 +35,15 @@ class Vector {
 			for (size_type i = 0; i < m_official_size; i++)
 				m_p[i] = value;
 		}
+		template<class InputIt>
+		Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator());
+		Vector(const Vector&);
 		~Vector();
 	private:
 		Allocator	m_allocator;
-		size_type	m_official_size;
-		size_type	m_true_size;
-		pointer 	m_p;
+		pointer		m_start;
+		pointer		m_finish;
+		pointer 	m_end_of_storage;
 };
 }
 

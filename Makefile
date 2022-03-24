@@ -1,7 +1,7 @@
-NAME = libstl.a
+NAME = stl_test
 
 #SRCS	= iterators/IOIterator.hpp iterators/ForwardIterator.hpp
-SRCS	+= Vector.hpp
+SRCS	+= main.cpp
 OBJS = $(SRCS:.hpp=.o)
 
 CFLAGS = -Werror -Wextra -Wall
@@ -9,11 +9,11 @@ CC	= clang++
 
 all:		$(NAME)
 
-test:		$(NAME)
-	$(CC) $(CFLAGS) main.cpp -L. -lstl
-
 $(NAME):	$(OBJS)
-	ar rcs $(NAME) $(OBJS)
+	$(CC) $(CFLAGS) main.cpp -o $(NAME)
+
+test: $(NAME)
+	./test
 
 clean:
 	rm -f $(OBJS)
@@ -23,9 +23,7 @@ fclean: clean
 
 re:		fclean all
 
-.hpp.o:
-	$(CC) $(CFLAGS) -c $< -o $(<:.hpp=.o)
+.cpp.o:
+	$(CC) $(CFLAGS) -c $< -o $(<:.cpp=.o)
 
-.PHONY: all clean fclean re debug test
-.SUFFIXES:
-.SUFFIXES: .hpp .o
+.PHONY: all clean fclean re test
