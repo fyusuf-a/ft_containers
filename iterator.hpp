@@ -51,7 +51,7 @@ struct iterator {
 template<typename _Iter>
 class reverse_iterator {
 	public:
-	typedef _Iter												iterator_type;
+	typedef _Iter													iterator_type;
 	typedef typename ft::iterator_traits<_Iter>::iterator_category	iterator_category;
 	typedef typename ft::iterator_traits<_Iter>::value_type			value_type;
 	typedef typename ft::iterator_traits<_Iter>::difference_type	difference_type;
@@ -142,32 +142,32 @@ class reverse_iterator {
 };
 
 template<class Iter1, class Iter2>
-bool operator==(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator==(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() == rhs.base();
 }
 
 template<class Iter1, class Iter2>
-bool operator!=(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator!=(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() != rhs.base();
 }
 
 template<class Iter1, class Iter2>
-bool operator<(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator<(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() > rhs.base();
 }
 
 template<class Iter1, class Iter2>
-bool operator<=(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator<=(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() >= rhs.base();
 }
 
 template<class Iter1, class Iter2>
-bool operator>(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator>(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() < rhs.base();
 }
 
 template<class Iter1, class Iter2>
-bool operator>=(const std::reverse_iterator<Iter1>& lhs, const std::reverse_iterator<Iter2>&rhs) {
+bool operator>=(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() <= rhs.base();
 }
 

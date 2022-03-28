@@ -1,29 +1,24 @@
-NAME = stl_test
+SRCS	= tests/miscellaneous.cpp
+HEADERS = algorithm.hpp iterator.hpp type_traits.hpp utility.hpp
+EXECS = $(SRCS:.cpp=)
 
-#SRCS	= iterators/IOIterator.hpp iterators/ForwardIterator.hpp
-SRCS	+= main.cpp
-OBJS = $(SRCS:.hpp=.o)
-
-CFLAGS = -Werror -Wextra -Wall
+CFLAGS = -Werror -Wextra -Wall --std=c++98
 CC	= clang++
 
-all:		$(NAME)
+all:		$(EXECS)
 
-$(NAME):	$(OBJS)
-	$(CC) $(CFLAGS) main.cpp -o $(NAME)
-
-test: $(NAME)
-	./test
+$(EXECS): %: %.cpp $(HEADERS)
+	$(CC) -o $@ $< $(CFLAGS)
+	$@
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(EXECS)
 
 fclean: clean
-	rm -f $(NAME)
 
 re:		fclean all
 
-.cpp.o:
-	$(CC) $(CFLAGS) -c $< -o $(<:.cpp=.o)
+.cpp:
+	$(CC) $(CFLAGS) $< -o $(<:.cpp=)
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re
