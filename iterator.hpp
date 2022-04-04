@@ -105,14 +105,14 @@ class reverse_iterator {
 	}
 
 	// it++
-	reverse_iterator& operator++(int) {
+	reverse_iterator operator++(int) {
 		reverse_iterator tmp = *this;
 		m_current--;
 		return tmp;
 	}
 
 	// it--
-	reverse_iterator& operator--(int) {
+	reverse_iterator operator--(int) {
 		reverse_iterator tmp = *this;
 		m_current++;
 		return tmp;
@@ -169,6 +169,16 @@ bool operator>(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterato
 template<class Iter1, class Iter2>
 bool operator>=(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>&rhs) {
 	return lhs.base() <= rhs.base();
+}
+
+template<class Iter>
+reverse_iterator<Iter> operator+(typename ft::reverse_iterator<Iter>::difference_type n, const ft::reverse_iterator<Iter>& it) {
+	return it + n;
+}
+
+template<class Iter>
+typename reverse_iterator<Iter>::difference_type operator-(const ft::reverse_iterator<Iter>& lhs, const ft::reverse_iterator<Iter>& rhs) {
+	return rhs.base() - lhs.base();
 }
 
 } // namespace ft

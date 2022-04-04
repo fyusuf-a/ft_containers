@@ -1,15 +1,13 @@
 #ifndef FT_VECTOR_HPP
 #define FT_VECTOR_HPP
 
+#include <iostream>
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include "iterator.hpp"
 #include "type_traits.hpp"
 #include "algorithm.hpp"
-
-#define COPY_ELEMENTS 1
-#define CHANGE_SIZE 1
 
 namespace ft {
 template<class T, class Allocator = std::allocator<T> >
@@ -28,12 +26,12 @@ class vector {
 		typedef ft::reverse_iterator<iterator>			reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
 
-		// constructors very ok
+		// constructors x
 		vector()
 			: _allocator()
 			, _start(_allocator.allocate(0))
 			, _end(_start)
-			, _end_capacity(end)
+			, _end_capacity(_end)
 		{}
 
 		explicit vector(const Allocator& alloc)
@@ -45,76 +43,74 @@ class vector {
 
 		explicit vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator())
 			: _allocator(alloc)
-			, _start(_allocator.allocate(count))
-			, _end(_start + count)
+			, _start(_allocator.allocate(0))
+			, _end(_start)
 			, _end_capacity(_end)
 		{
-			assign(size(), value);
+			assign(count, value);
 		}
 
-		template<class InputIt, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type* = 0>
-		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+		template<class InputIt>
+		vector(InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last, const Allocator& alloc = Allocator())
 			: _allocator(alloc)
-			, _start(_allocator.allocate(last - first))
-			, _end(_start + (last - first))
+			, _start(_allocator.allocate(0))
+			, _end(_start)
 			, _end_capacity(_end) {
 			assign(first, last);
 		}
 
 		vector(const vector& other)
 			: _allocator(other._allocator)
-			, _start(_allocator.allocate(other._end - other._start))
-			, _end(_start + (other._end - other._start))
+			, _start(_allocator.allocate(0))
+			, _end(_start)
 			, _end_capacity(_end) {
 			assign(other.begin(), other.end());
 		}
 
-		// destructor very ok
+		// destructor x
 		~vector() {
 			for (size_type i = 0; i < size(); i++)
 				_allocator.destroy(_start + i);
 			_allocator.deallocate(_start, capacity());
+			_start = 0;
 		}
 
-		// operator= very ok
+		// operator= x
 		vector& operator=(const vector& other) {
 			if (this != &other) {
-				_allocator.deallocate(_start, capacity());
-				_start = _allocator.allocate(other._end - other._start);
-				_end = _start + (other._end - other._start);
-				_end_capacity = _end;
+				resize(other.size());
 				for (size_type i = 0; i < size(); i++)
-					_allocator.construct(_start + i, other._start[i]);
+					_start[i] = other._start[i];
 			}
 			return *this;
 		}
 
-		// assign very ok
+		// assign x
 		void assign(size_type count, const T& value) {
-			if (!_maybe_grow(count, !COPY_ELEMENTS, CHANGE_SIZE, value))
-				for (size_type i = 0; i < count; i++)
-					_allocator.construct(_start + i, value);
+			clear();
+			insert(begin(), count, value);
 		}
-		template<class InputIt, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type* = 0>
-		void assign(InputIt first, InputIt last) {
-			_maybe_grow(last - first, !COPY_ELEMENTS, CHANGE_SIZE);
-			for (InputIt it = first; it != last; it++)
-				_allocator.construct(_start + (it - first), *it);
+		template<class InputIt>
+		void assign(InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last) {
+			clear();
+			insert(begin(), first, last);
 		}
 
-		// get_allocator very ok
+		// get_allocator
 		allocator_type get_allocator() const {
 			return _allocator;
 		}
 
-		// element access very ok
+		// element access
 		reference at(size_type pos) {
 			if (pos >= size())
 				throw std::out_of_range("ft::vector::at");
 			return _start[pos];
 		}
 		const_reference at(size_type pos) const {
-			return at(pos);
+			if (pos >= size())
+				throw std::out_of_range("ft::vector::at");
+			return _start[pos];
 		}
 		reference operator[](size_type pos) {
 			return _start[pos];
@@ -135,7 +131,7 @@ class vector {
 			return _start[size() - 1];
 		}
 
-		// iterators ok
+		// iterators
 		iterator begin() {
 			return _start;
 		}
@@ -174,99 +170,137 @@ class vector {
 		void reserve(size_type new_cap) {
 			if (new_cap >= max_size())
 				throw std::length_error("vector::reserve: new size is too big");
-			_maybe_grow(new_cap, COPY_ELEMENTS, !CHANGE_SIZE);
+			if (new_cap > capacity()) {
+				size_t old_size = size();
+				pointer new_start = _allocator.allocate(new_cap);
+				for (size_type i = 0; i < size(); i++) {
+					_allocator.construct(new_start + i, _start[i]);
+					_allocator.destroy(_start + i);
+				}
+				_allocator.deallocate(_start, capacity());
+				_start = new_start;
+				_end = _start + old_size;
+				_end_capacity = _start + new_cap;
+			}
 		}
 		size_type capacity() const {
 			return _end_capacity - _start;
 		}
 
 		// modifiers
-		// ok
 		void clear() {
 			erase(begin(), end());
 		}
 
 		iterator insert(iterator pos, const T& value) {
-			insert(pos, 1, value);
-			return pos;
+			return _insert(pos, 1, value);
 		}
 
 		void insert(iterator pos, size_type count, const T& value) {
-			maybe_grow(size() + count - capacity(), COPY_ELEMENTS, !CHANGE_SIZE);
-			iterator new_end = _end + count;
-			ft::copy_backward(pos, _end, new_end);
-			_end = new_end;
-			for (iterator it = pos; it != pos + count; it++)
-				_allocator.construct(it, value);
+			_insert(pos, count, value);
 		}
 
+		private:
+		iterator _insert(iterator pos, size_type count, const T& value) {
+			difference_type index = pos - begin();
+			if (2 * size() + count <= max_size())
+				reserve(2 * size() + count);
+			else
+				reserve(size() + count);
+			iterator it;
+			for (it = _start + size() + count - 1; it >= _start + index + count; it--) {
+				if (it >= _start + size())
+					_allocator.construct(it, *(it - count));
+				else
+					*it = *(it - count);
+			}
+			for (; it >= _start + index; it--) {
+				if (it >= _start + size())
+					_allocator.construct(it, value);
+				else
+					*it = value;
+			}
+			_end = _end + count;
+			return _start + index;
+		}
+
+		public:
 		template<class InputIt>
-		void insert(iterator pos, InputIt first, InputIt last) {
-			size_t count = last - first;
-			maybe_grow(size() + count - capacity());
-			iterator new_end = _end + count;
-			ft::copy_backward(pos, _end, new_end);
-			ft::copy(pos, pos + count, first);
+		void insert(iterator pos, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type first, InputIt last) {
+			difference_type index = pos - begin();
+			size_t count = ft::distance(first, last);
+			if (2 * size() + count < max_size())
+				reserve(2 * size() + count);
+			else
+				reserve(size() + count);
+			iterator it;
+			for (it = _start + size() + count - 1; it >= _start + index + count; it--)
+			{
+				if (it >= _start + size())
+					_allocator.construct(it, *(it - count));
+				else
+					*it = *(it - count);
+			}
+			last--;
+			for (; it >= _start + index; it--)
+			{
+				if (it >= _start + size())
+					_allocator.construct(it, *(last--));
+				else
+					*it = *(last--);
+			}
+			_end = _end + count;
 		}
 
-		void erase(iterator position) {
-			erase(position, position + 1);
+		iterator erase(iterator position) {
+			return erase(position, position + 1);
 		}
 
-		void erase(iterator first, iterator last) {
+		iterator erase(iterator first, iterator last) {
 			difference_type number_of_deleted = last - first;
 			ft::copy(last, _end, first);
-			ft::destroy(_end - number_of_deleted, number_of_deleted);
+			for (pointer it = _end - number_of_deleted; it != _end; it++)
+				_allocator.destroy(it);
 			_end -= number_of_deleted;
+			return first;
 		}
 
 		void push_back(const T& value) {
-			maybe_grow(1);
+			if (2 * size() + 1 <= max_size())
+				reserve(2 * size() + 1);
+			else
+				reserve(size() + 1);
 			_allocator.construct(_end, value);
 			++_end;
 		}
 
-		private:
-		// changes the capacity of the vector to count. The resulting vector
-		// contains constructed elements : the first size() elements are copied
-		// if copy is true, otherwise, the value is used
-		// if the new size is greater than the current capacity, the capacity is
-		// increased, and the elements are copied to the new storage if copy is true
-		// returns if the growth was done
-		bool _maybe_grow(size_t count, bool copy, bool change_size, T& value = T()) {
-			size_t old_size = size();
-			if (count > capacity()) {
-				pointer new_start = _allocator.allocate(count);
-				pointer i = new_start;
-				for (; i < size(); i++) {
-					_allocator.construct(new_start + i, copy ? _start[i] : T());
-					_allocator.destroy(_start + i);
-				}
-				_allocator.deallocate(_start, capacity());
-				_start = new_start;
-				_end = _start + (change_size ? count : old_size);
-				for (; i < size(); i++)
-					_allocator.construct(T());
-				_end_capacity = _start + count;
-				return true;
-			}
-			return false;
+		void pop_back() {
+			_allocator.destroy(_end - 1);
+			--_end;
 		}
 
-		public:
-
-		// ok
-		void _resize(size_type count, T c = T()) {
+		void resize(size_type count, T c = T()) {
 			size_type old_size = size();
-			_maybe_grow(true);
 			if (count > old_size) {
-				for (pointer i = old_size; i < count; i++)	
+				if (2 * count <= max_size())
+					reserve(2 * count);
+				else
+					reserve(count);
+				for (size_type i = old_size; i < count; i++)	
 					_allocator.construct(_start + i, c);
+				_end = _start + count;
 			}
 			else if (count < old_size) {
 				for (size_type i = count; i < old_size; i++)
 					_allocator.destroy(_start + i);
+				_end = _start + count;
 			}
+		}
+
+		void swap(vector& other) {
+			ft::swap(_start, other._start);
+			ft::swap(_end, other._end);
+			ft::swap(_end_capacity, other._end_capacity);
 		}
 
 		
@@ -276,6 +310,50 @@ class vector {
 		pointer		_end;
 		pointer 	_end_capacity;
 };
+
+// x
+template<class T>
+bool operator==(const vector<T>& lhs, const vector<T>& rhs) {
+	if (lhs.size() != rhs.size())
+		return false;
+	for (size_t i = 0; i < lhs.size(); i++)
+		if (lhs[i] != rhs[i])
+			return false;
+	return true;
 }
+
+// x
+template<class T>
+bool operator!=(const vector<T>& lhs, const vector<T>& rhs) {
+	return !(lhs == rhs);
+}
+
+template<class T>
+bool operator<(const vector<T>& lhs, const vector<T>& rhs) {
+	return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template<class T>
+bool operator<=(const vector<T>& lhs, const vector<T>& rhs) {
+	return !(rhs < lhs);
+}
+
+template<class T>
+bool operator>(const vector<T>& lhs, const vector<T>& rhs) {
+	return rhs < lhs;
+}
+
+template<class T>
+bool operator>=(const vector<T>& lhs, const vector<T>& rhs) {
+	return !(lhs < rhs);
+}
+
+template<class T, class Allocator>
+void swap(vector<T, Allocator>& lhs, vector<T, Allocator>& rhs) {
+	lhs.swap(rhs);
+}
+
+}
+
 
 #endif

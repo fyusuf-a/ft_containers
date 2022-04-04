@@ -6,6 +6,13 @@
 
 namespace ft
 {
+	template<class T>
+	void swap(T& a , T& b) {
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
 	template<class InputIt1, class InputIt2>
 	bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
 	{
@@ -101,11 +108,16 @@ namespace ft
 		return d_last;
 	}
 
-	template<class ForwardIt>
-	void destroy(ForwardIt first, ForwardIt last)
+	template<class InputIt>
+	typename ft::iterator_traits<InputIt>::difference_type distance(InputIt first, InputIt last)
 	{
-		for(; first != last; ++first)
-			first->~T();
+		typename ft::iterator_traits<InputIt>::difference_type n = 0;
+		while (first != last)
+		{
+			++first;
+			++n;
+		}
+		return n;
 	}
 };
 

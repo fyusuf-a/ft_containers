@@ -8,22 +8,6 @@
 
 #define TEST(i) std::cout << "Test no " << i << std::endl; i++;
 
-namespace ft {
-template<class BidirIt>
-typename std::iterator_traits<BidirIt>::difference_type
-distance (BidirIt first, BidirIt last)
-{
-	typename ft::iterator_traits<BidirIt>::difference_type result = 0;
-	while (first != last) {
-		++first;
-		++result;
-	}
-	return result;
-}
-
-
-}
-
 void test_pair() {
 	ft::pair<int, int> p1(1, 2);
 	ft::pair<int, int> p2(1, 3);
