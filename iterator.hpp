@@ -78,6 +78,9 @@ class reverse_iterator {
 
 	template<class U>
 	reverse_iterator& operator=(const reverse_iterator<U>& other) {
+		// The following casts are necessary to let a line like
+		// `const_reverse_iterator it = vec.rbegin();` compile
+		//if (static_cast<void*>(this) != const_cast<void*>(static_cast<const void*>(&other)))
 		if (this != &other)
 			m_current = other.base();
 		return *this;
@@ -176,8 +179,8 @@ reverse_iterator<Iter> operator+(typename ft::reverse_iterator<Iter>::difference
 	return it + n;
 }
 
-template<class Iter>
-typename reverse_iterator<Iter>::difference_type operator-(const ft::reverse_iterator<Iter>& lhs, const ft::reverse_iterator<Iter>& rhs) {
+template<class Iter1, class Iter2>
+typename reverse_iterator<Iter1>::difference_type operator-(const ft::reverse_iterator<Iter1>& lhs, const ft::reverse_iterator<Iter2>& rhs) {
 	return rhs.base() - lhs.base();
 }
 

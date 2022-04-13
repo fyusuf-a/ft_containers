@@ -18,7 +18,4 @@ fclean: clean
 
 re:		fclean all
 
-.cpp:
-	$(CC) $(CFLAGS) $< -o $(<:.cpp=)
-
 .PHONY: all clean fclean re
