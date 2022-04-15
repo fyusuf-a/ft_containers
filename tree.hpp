@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
+#include <stdexcept>
 
 namespace ft {
 
@@ -81,11 +82,14 @@ public:
 
 	// returns a possibly new root for the tree or nullptr
 	static Node<K, V>* update_balance_insert(Node<K, V>* node) {
+		bool is_root = Node<K,V>::is_root(node);
 		if (node->balance_factor > 1 || node->balance_factor < -1) {
 			// the recursion must stop after rebalancing
 			// as the height of the node is unchanged
-			return rebalance(node);
+			node = rebalance(node);
+			return is_root ? node : nullptr;
 		}
+
 		if (node->parent) {
 			if (is_left_child(node))
 				node->parent->balance_factor--;
@@ -96,24 +100,21 @@ public:
 			// the recursion must stop as the height of the parent is unchanged
 			return nullptr;
 		}
-		// the parent is the root
 		return node;
 	}
 
 	// returns a possibly new root for the tree or nullptr
 	static Node<K, V>* update_balance_delete(Node<K, V>* node) {
-		//pretty_print(node, 0, std::cout);
+		if (!node)
+			return nullptr;
 		Node<K, V>* newRoot = node;
 		if (node->balance_factor > 1 || node->balance_factor < -1) {
 			// one has to analyze the child on the other side of the recursion
 			// to know if the height of the node changes after rebalancing
+			bool other_child_is_left = node->balance_factor == -2;
 			Node<K, V>* other_child = node->balance_factor == -2 ? node->left : node->right;
 			bool stop_recursion = other_child->balance_factor == 0;
-			std::cout << "before rebalance" << std::endl;
-			pretty_print(node, 0, std::cout);
 			newRoot = rebalance(node);
-			std::cout << "after rebalance: " << (newRoot ? "new root" : "no new root") <<  std::endl;
-			pretty_print(newRoot ? newRoot : node, 0, std::cout);
 			node = newRoot ? newRoot : node;
 			if (stop_recursion)
 				return node->parent ? nullptr : node;
@@ -132,80 +133,65 @@ public:
 		//return newRoot ? newRoot : node;
 	}
 
-	// returns a possibly new root for the tree or nullptr
+	// returns a new root for the tree
 	static Node<K, V>* rotateLeft(Node<K, V>* root) {
-		std::cout << "rotateLeft" << std::endl;
 		Node<K, V>* newRoot = root->right;
 		root->right = newRoot->left;
 		if (newRoot->left)
 			newRoot->left->parent = root;
 		newRoot->parent = root->parent;
 		int return_a_new_root = 0;
-		if (is_root(root))
-		{
-			std::cout << "returns a new root" << std::endl;
-			return_a_new_root = 1; } else if (is_left_child(root))
+		if (is_left_child(root))
 			root->parent->left = newRoot;
-		else
+		else if (is_right_child(root))
 			root->parent->right = newRoot;
 		newRoot->left = root;
 		root->parent = newRoot;
 		root->balance_factor = root->balance_factor - 1 - ft::max<char>(newRoot->balance_factor, 0);
 		newRoot->balance_factor = newRoot->balance_factor - 1 + ft::min<char>(root->balance_factor, 0);
-		return return_a_new_root ? newRoot : nullptr;
+		return newRoot;
 	}
 
-	// returns a possibly new root for the tree or nullptr
-	//static Node<K, V>* rotateRight(Node<K, V>* root) {
+	// returns a new root for the tree
 	static Node<K, V>* rotateRight(Node<K, V>* root) {
-		std::cout << "rotateRight" << std::endl;
 		Node<K, V>* newRoot = root->left;
 		root->left = newRoot->right;
 		if (newRoot->right)
 			newRoot->right->parent = root;
 		newRoot->parent = root->parent;
-		int return_a_new_root = 0;
-		if (is_root(root))
-		{
-			std::cout << "returns a new root" << std::endl;
-			return_a_new_root = 1;
-		}
-		else if (is_left_child(root))
+		if (is_left_child(root))
 			root->parent->left = newRoot;
-		else
+		else if (is_right_child(root))
 			root->parent->right = newRoot;
 		newRoot->right = root;
 		root->parent = newRoot;
 		root->balance_factor = root->balance_factor + 1 - ft::min<char>(newRoot->balance_factor, 0);
 		newRoot->balance_factor = newRoot->balance_factor + 1 + ft::max<char>(root->balance_factor, 0);
 		assert(root->parent->right == root);
-		return return_a_new_root ? newRoot : nullptr;
+		return newRoot;
 	}
 
-	// returns a possibly new root for the tree or nullptr
+	// returns a new root for the tree, this function should only be called if
+	// the node's balance factor is 2 or -2
 	static Node<K, V>* rebalance(Node<K, V>* node) {
 		Node<K, V>* newRoot;
 		if (node->balance_factor == 2) {
-			if (node->right->balance_factor == -1) {
-				newRoot = rotateRight(node->right);
-				node->right = newRoot ? newRoot : node->right;
-			}
+			if (node->right->balance_factor == -1)
+				rotateRight(node->right);
 			return rotateLeft(node);
 		}
 		else if (node->balance_factor == -2) {
-			if (node->left->balance_factor == 1) {
-				newRoot = rotateLeft(node->left);
-				node->left = newRoot ? newRoot : node->left;
-			}
+			if (node->left->balance_factor == 1)
+				rotateLeft(node->left);
 			return rotateRight(node);
 		}
-		return nullptr;
+		throw std::runtime_error("rebalance: node has wrong balance factor");
 	}
 
 	// Modifiers
 
 	// returns a possibly new root for the tree or nullptr
-	static Node<K, V>* insert(Node<K, V>* node, K k, V v, bool* is_size_incremented, bool test=false) {
+	static Node<K, V>* insert(Node<K, V>* node, K k, V v, bool* is_size_incremented) {
 		if (!node)
 		{
 			*is_size_incremented = 1;
@@ -219,10 +205,7 @@ public:
 				assert(node->left->parent == node);
 				*is_size_incremented = 1;
 				assert(node->left != 0);
-				if (!test)
-					return update_balance_insert(node->left);
-				else
-					return nullptr;
+				return update_balance_insert(node->left);
 			}
 		}
 		else if (k > node->data.first) {
@@ -233,10 +216,7 @@ public:
 				assert(node->right->parent == node);
 				*is_size_incremented = 1;
 				assert(node->right != 0);
-				if (!test)
-					return update_balance_insert(node->right);
-				else
-					return nullptr;
+				return update_balance_insert(node->right);
 			}
 		}
 		else {
@@ -246,52 +226,66 @@ public:
 		}
 	}
 
-	// return value is only for recursion, changes the value of *newRoot
-	static Node<K, V>* erase(Node<K, V>* node, K key, size_t* removed, Node<K, V>** newRoot) {
-		if (!node)
-			return nullptr;
-		if (key < node->data.first) {
-			node->left = erase(node->left, key, removed, newRoot);
-			return node;
-		}
-		else if (key > node->data.first) {
-			node->right = erase(node->right, key, removed, newRoot);
-			return node;
+	// returns a possibly new root for the tree or nullptr
+	// this function takes a node to be deleted and recursively balances its
+	// ancestors
+	// please note that node_to_delete, if not null, does not have any children
+	static void end_erase(Node<K, V>* node_to_delete, bool* has_new_root, Node<K, V>** new_root) {
+		if (!node_to_delete->parent) {
+			*new_root = nullptr;
+			*has_new_root = true;
 		}
 		else {
-			*removed = 1;
-			if (!node->left && !node->right) {
-				std::cout << "here" << std::endl;
-				if (node->parent) {
-					Node<K, V> *possibly_new_root = update_balance_delete(node);
-					std::cout << (possibly_new_root ? "possibly_new_root" : "no_new_root") << std::endl;
-					*newRoot = possibly_new_root ? possibly_new_root : *newRoot;
-				}
-				else
-				{
-					std::cout << "here2" << std::endl;
-					*newRoot = nullptr;
-				}
-				delete node;
-				return nullptr;
-			}
-			else if (!node->left || !node->right) {
-				Node<K, V> tmp = *node;
-				Node<K, V> *possibly_new_root = update_balance_delete(node);
-				*newRoot = possibly_new_root ? possibly_new_root : *newRoot;
-				delete node;
-				Node<K, V> *ret = tmp.left ? tmp.left : tmp.right;
-				ret->parent = tmp.parent;
-				*newRoot = ret->parent ? *newRoot : ret;
-				return ret;
-			}
-			Node<K, V>* temp = node->right;
-			while (temp->left)
-				temp = temp->left;
-			node->data = temp->data;
-			node->right = erase(node->right, temp->data.first, removed, newRoot);
+			Node<K, V>* possibly_new_root = update_balance_delete(node_to_delete);
+			*has_new_root = possibly_new_root;
+			*new_root = possibly_new_root ? possibly_new_root : *new_root;
+		}
+		if (is_left_child(node_to_delete))
+			node_to_delete->parent->left = nullptr;
+		else if (is_right_child(node_to_delete))
+			node_to_delete->parent->right = nullptr;
+		delete node_to_delete;
+	}
+	
+
+	// return value is only for recursion, changes the value of *newRoot, this
+	// function is not to be called in the case where there is only one node in the tree
+	static Node<K, V>* begin_erase(Node<K, V>* node, K key, Node<K, V>** node_to_delete, bool* has_new_root, Node<K,V>** new_root) {
+		if (!node)
+			return nullptr;
+		if (node->data.first < key) {
+			node->right = begin_erase(node->right, key, node_to_delete, has_new_root, new_root);
 			return node;
 		}
+		else if (node->data.first > key) {
+			node->left = begin_erase(node->left, key, node_to_delete, has_new_root, new_root);
+			return node;
+		}
+		if (!node->left && !node->right) {
+			if (!node->parent) {
+				*has_new_root = true;
+				*new_root = nullptr;
+			}
+			*node_to_delete = node;
+			return node;
+		}
+		else if (!node->left || !node->right) {
+			Node<K, V> *ret = node->left ? node->left : node->right;
+			ret->parent = node->parent;
+			node->parent = ret;
+			*node_to_delete = node;
+			if (!node->parent) {
+				*has_new_root = true;
+				*new_root = ret;
+			}
+			return ret;
+		}
+		Node<K, V>* temp = node->right;
+		while (temp->left)
+			temp = temp->left;
+		node->data = temp->data;
+		node->right = begin_erase(node->right, temp->data.first, node_to_delete, has_new_root, new_root);
+		return node;
 	}
 
 	static void pretty_print(Node<K, V>* node, int depth, std::ostream& os) {
@@ -352,25 +346,35 @@ public:
 		// as the newRoot is detected through a change to a Node pointer which
 		// is null at the beginning, we have to treat the special case where
 		// the root is deleted and the tree becomes empty
-		if (_root && _root->data.first == key && !_root->left && !_root->right) {
+		/*if (_root && _root->data.first == key && !_root->left && !_root->right) {
 			delete _root;
 			_root = nullptr;
 			_size--;
 			return true;
+		}*/
+		Node<K, V>* node_to_delete = nullptr;
+		Node<K, V>* possibly_new_root = nullptr;
+		bool has_new_root = false;
+		Node<K, V>::begin_erase(_root, key, &node_to_delete, &has_new_root, &possibly_new_root);
+		_root = has_new_root ? possibly_new_root : _root;
+		bool ret = false;
+		if (node_to_delete) { // if the key appears and a node has to be deleted
+			_size -= 1;
+			possibly_new_root = nullptr;
+			has_new_root = false;
+			Node<K, V>::end_erase(node_to_delete, &has_new_root, &possibly_new_root);
+			if (possibly_new_root)
+				_root = possibly_new_root;
 		}
-		size_type removed = 0;
-		Node<K, V>* newRoot = nullptr;
-		Node<K, V>::erase(_root, key, &removed, &newRoot);
-		_root = newRoot ? newRoot : _root;
-		_size -= static_cast<size_type>(removed);
-		return removed;
+		//_root = newRoot ? newRoot : _root;
+		return ret;
 	}
 
 	// insert a key-value pair
-	bool insert(const K& key, const V& value, bool test = false) {
+	bool insert(const K& key, const V& value) {
 		bool size_incremented = 0;
 		Node<K, V>* newRoot;
-		newRoot = Node<K, V>::insert(_root, key, value, &size_incremented, test);
+		newRoot = Node<K, V>::insert(_root, key, value, &size_incremented);
 		if (newRoot)
 			_root = newRoot;
 		_size += static_cast<size_type>(size_incremented);
