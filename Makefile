@@ -1,4 +1,4 @@
-SRCS	= tests/miscellaneous.cpp tests/vector.cpp
+SRCS	= tests/miscellaneous.cpp tests/vector.cpp tests/tree_test.cpp
 HEADERS = algorithm.hpp iterator.hpp type_traits.hpp utility.hpp
 EXECS = $(SRCS:.cpp=)
 
