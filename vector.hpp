@@ -26,7 +26,7 @@ class vector {
 		typedef ft::reverse_iterator<iterator>			reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
 
-		// constructors x
+		// constructors
 		vector()
 			: _allocator()
 			, _start(_allocator.allocate(0))
@@ -67,7 +67,7 @@ class vector {
 			assign(other.begin(), other.end());
 		}
 
-		// destructor x
+		// destructor
 		~vector() {
 			for (size_type i = 0; i < size(); i++)
 				_allocator.destroy(_start + i);
@@ -75,7 +75,7 @@ class vector {
 			_start = 0;
 		}
 
-		// operator= x
+		// operator=
 		vector& operator=(const vector& other) {
 			if (this != &other) {
 				resize(other.size());
@@ -85,7 +85,7 @@ class vector {
 			return *this;
 		}
 
-		// assign x
+		// assign
 		void assign(size_type count, const T& value) {
 			clear();
 			insert(begin(), count, value);
@@ -311,7 +311,6 @@ class vector {
 		pointer 	_end_capacity;
 };
 
-// x
 template<class T>
 bool operator==(const vector<T>& lhs, const vector<T>& rhs) {
 	if (lhs.size() != rhs.size())
@@ -322,7 +321,6 @@ bool operator==(const vector<T>& lhs, const vector<T>& rhs) {
 	return true;
 }
 
-// x
 template<class T>
 bool operator!=(const vector<T>& lhs, const vector<T>& rhs) {
 	return !(lhs == rhs);
