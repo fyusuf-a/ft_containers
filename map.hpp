@@ -2,17 +2,18 @@
 #define MAP_HPP
 
 #include "tree.hpp"
+#include "utility.hpp"
 
 namespace ft {
 
-template<class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<std::pair<const K, V> > >
+template<class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<ft::pair<const K, V> > >
 class map : public BinaryTree<K, V, Compare, Alloc>
 {
 	public:
 
 	typedef K														key_type;
 	typedef V														mapped_type;
-	typedef std::pair<const K, V>									value_type;
+	typedef ft::pair<const K, V>									value_type;
 	typedef typename BinaryTree<K, V, Compare, Alloc>::size_type	size_type;
 	typedef std::ptrdiff_t											difference_type;
 	typedef Compare													key_compare;
@@ -23,8 +24,8 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	typedef typename Alloc::const_pointer							const_pointer;
 	typedef NodeIterator<K, V, Compare, Alloc>						iterator;
 	typedef NodeIterator<K, const V, Compare, Alloc>				const_iterator;
-	typedef std::reverse_iterator<iterator>							reverse_iterator;
-	typedef std::reverse_iterator<const_iterator>					const_reverse_iterator;
+	typedef ft::reverse_iterator<iterator>							reverse_iterator;
+	typedef ft::reverse_iterator<const_iterator>					const_reverse_iterator;
 
 	private:
 	typedef typename BinaryTree<K, V, Compare, Alloc>::node_type	node_type;
@@ -68,24 +69,25 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	map(InputIt first, InputIt last, const Compare& comp = Compare(), const Alloc& alloc = Alloc()) : BinaryTree<K, V, Compare, Alloc>(comp, alloc)
 	{
 		InputIt it = first;
-		typename InputIt::value_type this_value;
-		typename InputIt::value_type last_value;
+		K this_key;
+		K last_key;
+		V this_value;
+		V last_value;
 		node_type* this_node = nullptr;
 		for (; it != last; ++it) {
-			this_value = *it;
-			if (it != first && (comp(this_value.first, last_value.first) || this_value == last_value))
+			this_key = it->first;
+			this_value = it->second;
+			this_node = this->_insert(this_node, this_key, this_value);
+			if (it != first && (comp(this_key, last_key) || this_key == last_key))
 				break;
-			this_node = this->_insert(this_node, this_value.first, this_value.second);
+			last_key = this_key;
 			last_value = this_value;
 		}
-		bool first_time = true;
-		for (; it != last; ++it) {
-			if (!first_time)
-				this_value = *it;
-			first_time = false;
-			insert(this_value);
-			//insert(ft::pair<const K, V>(this_value.first, this_value.second));
-		}
+		if (it == last)
+			return;
+		it++;
+		for (; it != last; ++it)
+			insert(*it);
 	}
 
 	map(const map& other) : BinaryTree<K, V, Compare, Alloc>(other) {}
@@ -125,7 +127,7 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 
 	V& operator[](const key_type& key)
 	{
-		return insert(key, V()).first->second;
+		return insert(ft::make_pair(key, V())).first->second;
 	}
 
 	// Iterators
@@ -170,13 +172,13 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Modifiers
 	// clear already defined in parent class
 
-	std::pair<iterator, bool> insert(const value_type& value) {
+	ft::pair<iterator, bool> insert(const value_type& value) {
 		size_type size = this->size();
 		node_type* node = this->_insert(value.first, value.second);
 		if (this->size() == size + 1)
-			return std::make_pair(iterator(node), true);
+			return ft::make_pair(iterator(node), true);
 		else
-			return std::make_pair(iterator(node), false);
+			return ft::make_pair(iterator(node), false);
 	}
 
 	iterator insert(iterator hint, const value_type& value) {
@@ -228,12 +230,12 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 		return const_iterator(_find(key));
 	}
 
-	std::pair<iterator, iterator> equal_range(const K& key) {
-		return std::make_pair(lower_bound(key), upper_bound(key));
+	ft::pair<iterator, iterator> equal_range(const K& key) {
+		return ft::make_pair(lower_bound(key), upper_bound(key));
 	}
 
-	std::pair<const_iterator, const_iterator> equal_range(const K& key) const {
-		return std::make_pair(lower_bound(key), upper_bound(key));
+	ft::pair<const_iterator, const_iterator> equal_range(const K& key) const {
+		return ft::make_pair(lower_bound(key), upper_bound(key));
 	}
 	
 	iterator lower_bound(const K& key) {

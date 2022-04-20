@@ -128,12 +128,16 @@ class BinaryTree {
 		{}
 
 		static Node* minimum(Node* node) {
+			if (!node)
+				return nullptr;
 			while (node->left)
 				node = node->left;
 			return node;
 		}
 
 		static Node* maximum(Node* node) {
+			if (!node)
+				return nullptr;
 			while (node->right)
 				node = node->right;
 			return node;
