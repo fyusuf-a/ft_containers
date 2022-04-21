@@ -30,28 +30,16 @@ void test_miscellaneous() {
 	}
 	ft::map<int, size_t, std::greater<size_t> > m2;
 	for (int i = 0; i < 10; i++) {
-		m1.insert(ft::pair<const int, size_t>(i, i));
+		m2.insert(ft::pair<const int, size_t>(i, i));
 	}
-	ft::map<int, size_t>::reverse_iterator it = m1.rend();
+	ft::map<int, size_t>::reverse_iterator it = m1.rbegin();
 	ft::map<int, size_t, std::greater<size_t> >::iterator jt = m2.begin();
-	std::cout << "go" << std::endl;
-	for (; jt != m2.end(); ++jt)
-		std::cout << jt->second << std::endl;
-	for (; it != m1.rbegin(); ++it)
-	{
-		std::cout << "lol" << std::endl;
-		std::cout << it->second << std::endl;
-	}
-	/*for (; it != m1.rbegin(); it--, jt++) {
-	std::cout << "go" << std::endl;
-		std::cout << jt->second << std::endl;
-		std::cout << it->second << " ";
+	for (; it != m1.rend(); it++, jt++) {
 		assert(jt != m2.end());
 		assert(it->first == jt->first);
 		assert(it->second == jt->second);
-		std::cout << "OK" << std::endl;
-	}*/
-	//assert(jt == m2.end());
+	}
+	assert(jt == m2.end());
 
 }
 
@@ -70,7 +58,6 @@ void test_constructor() {
 	}
 	int i = 0;
 	for (ft::map<int, size_t>::iterator it = m.begin(); it != m.end(); i++) {
-		std::cout << it->first << " " << it->second << std::endl;
 		assert(it->second == i);
 		it++;
 	}
