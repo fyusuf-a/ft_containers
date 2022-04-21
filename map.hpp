@@ -6,6 +6,7 @@
 
 namespace ft {
 
+// a tree, but with iterators
 template<class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<ft::pair<const K, V> > >
 class map : public BinaryTree<K, V, Compare, Alloc>
 {
@@ -49,7 +50,8 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Constructors
 	map() : BinaryTree<K, V, Compare, Alloc>() {}
 
-	explicit map(const Compare& comp, const Alloc& alloc = Alloc()) : BinaryTree<K, V, Compare, Alloc>(comp, alloc) {}
+	explicit map(const Compare& comp, const Alloc& alloc = Alloc()) : BinaryTree<K, V, Compare, Alloc>(comp, alloc)
+	{}
 
 	private:
 	// the next function is used to optimize a constructor of map
@@ -60,6 +62,7 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 			where->right = new_node;
 		update_balance_insert(new_node);
 		this->_size += 1;
+		this->update_first_and_last();
 		return new_node;
 	}
 
@@ -83,8 +86,10 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 			last_key = this_key;
 			last_value = this_value;
 		}
-		if (it == last)
+		if (it == last) {
+			this->update_first_and_last();
 			return;
+		}
 		it++;
 		for (; it != last; ++it)
 			insert(*it);
@@ -95,12 +100,15 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Destructor
 	virtual ~map() {}
 
-	/*// Assignment
+	// Assignment
 	map& operator=(const map& other)
 	{
-		BinaryTree<K, V, Compare, Alloc>::operator=(other);
+		if (this != &other) {
+			BinaryTree<K, V, Compare, Alloc>::operator=(other);
+			this->update_first_and_last();
+		}
 		return *this;
-	}*/
+	}
 
 	allocator_type get_allocator() const
 	{
@@ -133,16 +141,16 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Iterators
 
 	iterator begin() {
-		return iterator(ft::BinaryTree<K, V, Compare, Alloc>::Node::minimum(this->_root));
+		return iterator(this, this->_first);
 	}
 	const_iterator begin() const {
-		return const_iterator(this->minimum(this->_root));
+		return const_iterator(this, this->_first);
 	}
 	iterator end() {
-		return iterator(nullptr);
+		return iterator(this, nullptr);
 	}
 	const_iterator end() const {
-		return const_iterator(nullptr);
+		return const_iterator(this, nullptr);
 	}
 	reverse_iterator rbegin() {
 		return reverse_iterator(end());
@@ -175,31 +183,32 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	ft::pair<iterator, bool> insert(const value_type& value) {
 		size_type size = this->size();
 		node_type* node = this->_insert(value.first, value.second);
+		this->update_first_and_last();
 		if (this->size() == size + 1)
-			return ft::make_pair(iterator(node), true);
+			return ft::make_pair(iterator(this, node), true);
 		else
-			return ft::make_pair(iterator(node), false);
+			return ft::make_pair(iterator(this, node), false);
 	}
 
 	iterator insert(iterator hint, const value_type& value) {
 		if (_find(value.first) != nullptr)
 			return end();
-		return iterator(_insert(value.first, value.second, hint._node));
+		iterator ret = iterator(this, _insert(value.first, value.second, hint._node));
+		this->update_first_and_last();
+		return ret;
 	}
 
 	template<class InputIt>
 	void insert(InputIt first, InputIt last) {
 		for (; first != last; ++first)
 			insert(*first);
+		this->update_first_and_last();
 	}
 
 	void erase(iterator pos)
 	{
-		node_type* node_to_delete = nullptr;
-		begin_erase(pos._node, pos->first, &node_to_delete);
-		ASSERT(node_to_delete != nullptr);
-		this->_size -= 1;
-		end_erase(node_to_delete);
+		_erase(pos);
+		this->update_first_and_last();
 	}
 
 	// TODO: wrong complexity ?
@@ -209,11 +218,20 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 			erase(first++);
 	}
 
+	size_type erase(const key_type& key)
+	{
+		size_type ret = _erase(key);
+		this->update_first_and_last();
+		return ret;
+	}
+
 	void swap(map& other)
 	{
 		ft::swap(this->_compare, other._compare);
 		ft::swap(this->_root, other._root);
 		ft::swap(this->_size, other.size);
+		ft::swap(this->_first, other._first);
+		ft::swap(this->_last, other._last);
 	}
 
 	// Lookup
@@ -223,11 +241,11 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	}
 
 	iterator find(const K& key) {
-		return iterator(_find(key));
+		return iterator(this, _find(key));
 	}
 
 	const_iterator find(const K& key) const {
-		return const_iterator(_find(key));
+		return const_iterator(this, _find(key));
 	}
 
 	ft::pair<iterator, iterator> equal_range(const K& key) {

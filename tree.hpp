@@ -28,29 +28,32 @@ class NodeIterator {
 	typedef ptrdiff_t										difference_type;
 	typedef ft::pair<const K, V>*							pointer;
 	typedef ft::pair<const K, V>&							reference;
-	typedef typename BinaryTree<K, V, Compare, Alloc>::Node	node_type;
+	typedef BinaryTree<K, V, Compare, Alloc>				tree_type;
+	typedef typename tree_type::Node						node_type;
 	//typedef node_type*										iterator;
 
-	protected:
+	//protected:
+	public: // TODO : remove
 	node_type*							_node;
+	tree_type*							_tree;
+
 
 	public:
-	NodeIterator() : _node(nullptr) {}
+	NodeIterator() : _tree(), _node(nullptr) {}
 
-	explicit NodeIterator(node_type* n) : _node(n) {}
+	explicit NodeIterator(tree_type* t, node_type* n) : _tree(t), _node(n) {}
 
 	template<class K2, class V2, class Compare2>
 	NodeIterator(const NodeIterator<K2, V2, Compare2, Alloc>& other) : _node(other.node) {}
 
 	template<class K2, class V2, class Compare2>
 	NodeIterator& operator=(const NodeIterator<K2, V2, Compare2, Alloc>& other) {
+		_tree = other._tree;
 		_node = other.node;
 		return *this;
 	}
 
 	reference operator*() const {
-		//return ft::pair<const K, V>(_node->data.first, _node->data.second);
-		//return static_cast<std::pair<const K, V> >(_node->data);
 		return _node->data;
 	}
 	
@@ -58,12 +61,28 @@ class NodeIterator {
 		return &(operator*());
 	}
 
-	NodeIterator& operator++() {
+	NodeIterator operator++() {
+		if (!_node) {
+			_node = _tree->_first;
+			return *this;
+		}
+		if (_node == _tree->_last) {
+			_node = nullptr;
+			return *this;
+		}
 		_node = _node->next(_node);
 		return *this;
 	}
 
-	NodeIterator& operator--() {
+	NodeIterator operator--() {
+		if (!_node) {
+			_node = _tree->_last;
+			return *this;
+		}
+		if (_node == _tree->_first) {
+			_node = nullptr;
+			return *this;
+		}
 		_node = _node->prev(_node);
 		return *this;
 	}
@@ -329,9 +348,18 @@ class BinaryTree {
 
 	protected:
 		node_type*				_root;
+	public: //TODO: remove public
+		node_type*				_first;
+		node_type*				_last;
 		size_type				_size;
 		node_allocator			_allocator;
 		Compare					_compare;
+
+	protected:
+		void update_first_and_last() {
+			_first = node_type::minimum(_root);
+			_last = node_type::maximum(_root);
+		}
 
 	public:
 		// attention, does not update balance_factor
@@ -522,6 +550,8 @@ class BinaryTree {
 		// constructor
 		BinaryTree():
 			_root(nullptr),
+			_first(nullptr),
+			_last(nullptr),
 			_size(0),
 			_allocator(node_allocator()),
 			_compare(Compare())
@@ -529,6 +559,8 @@ class BinaryTree {
 
 		explicit BinaryTree(const Compare& comp, const Alloc& alloc = Alloc()):
 			_root(nullptr),
+			_first(nullptr),
+			_last(nullptr),
 			_size(0),
 			_allocator(node_allocator(alloc)),
 			_compare(comp)
@@ -540,25 +572,27 @@ class BinaryTree {
 			_allocator(node_allocator(other._allocator)),
 			_compare(other._compare)
 		{
-			_root = copy_node(nullptr, other._root);
+			_root = _copy_node(nullptr, other._root);
+			update_first_and_last();
 		}
 
 		BinaryTree& operator=(const BinaryTree& other) {
 			if (this != &other) {
 				clear();
 				_size = other._size;
-				_root = copy_node(nullptr, other._root);
+				_root = _copy_node(nullptr, other._root);
+				update_first_and_last();
 			}
 			return *this;
 		}
 
-		node_type* copy_node(node_type* current, node_type* other) {
+		node_type* _copy_node(node_type* current, node_type* other) {
 			if (!other)
 				return nullptr;
 			node_type* new_node = _allocator.allocate(1, current);
 			new (new_node) node_type(other->data.first, other->data.second, current, 0, 0, other->balance_factor);
-			new_node->left = copy_node(new_node, other->left);
-			new_node->right = copy_node(new_node, other->right);
+			new_node->left = _copy_node(new_node, other->left);
+			new_node->right = _copy_node(new_node, other->right);
 			return new_node;
 		}
 
@@ -568,22 +602,24 @@ class BinaryTree {
 			clear();
 		}
 
-		void delete_node_rec(node_type* node) {
+		void _delete_node_rec(node_type* node) {
 			if (node == nullptr)
 				return;
 			if (node->left)
-				delete_node_rec(node->left);
+				_delete_node_rec(node->left);
 			if (node->right)
-				delete_node_rec(node->right);
+				_delete_node_rec(node->right);
 			_allocator.destroy(node);
 			_allocator.deallocate(node, 1);
 		}
 
 	public:
 		void clear() {
-			delete_node_rec(_root);
+			_delete_node_rec(_root);
 			_root = nullptr;
 			_size = 0;
+			_first = nullptr;
+			_last = nullptr;
 		}
 
 #ifdef FT_TEST
@@ -597,6 +633,7 @@ class BinaryTree {
 			if (node_to_delete) { // if the key appears and a node has to be deleted
 				_size -= 1;
 				end_erase(node_to_delete);
+				update_first_and_last();
 				return 1;
 			}
 			return 0;
@@ -605,6 +642,7 @@ class BinaryTree {
 		// insert a key-value pair
 		node_type* _insert(const K& key, const V& value) {
 			node_type* node = _insert(_root, key, value);
+			update_first_and_last();
 			return node;
 		}
 

@@ -1,3 +1,4 @@
+#define FT_TEST
 #include "map.hpp"
 #include "utility.hpp"
 #include <functional>
@@ -31,21 +32,28 @@ void test_miscellaneous() {
 	for (int i = 0; i < 10; i++) {
 		m1.insert(ft::pair<const int, size_t>(i, i));
 	}
-	/*ft::map<int, size_t>::reverse_iterator it = m1.rend();
+	ft::map<int, size_t>::reverse_iterator it = m1.rend();
 	ft::map<int, size_t, std::greater<size_t> >::iterator jt = m2.begin();
-	std::cout << "reverse iterator: " << std::endl;
-	for (ft::map<int, size_t>::reverse_iterator it = m1.rbegin(); it != m1.rend(); it++) {
-		std::cout << it->first << " " << it->second << std::endl;
+	std::cout << "go" << std::endl;
+	for (; jt != m2.end(); ++jt)
+		std::cout << jt->second << std::endl;
+	for (; it != m1.rbegin(); ++it)
+	{
+		std::cout << "lol" << std::endl;
+		std::cout << it->second << std::endl;
 	}
-	for (; it != m1.rbegin(); it++, jt++) {
+	/*for (; it != m1.rbegin(); it--, jt++) {
+	std::cout << "go" << std::endl;
+		std::cout << jt->second << std::endl;
+		std::cout << it->second << " ";
 		assert(jt != m2.end());
 		assert(it->first == jt->first);
 		assert(it->second == jt->second);
-	}
-	assert(jt == m2.end());*/
+		std::cout << "OK" << std::endl;
+	}*/
+	//assert(jt == m2.end());
 
 }
-
 
 void test_constructor() {
 	// Testing constructor...
@@ -61,8 +69,10 @@ void test_constructor() {
 		assert(m[i] == i);
 	}
 	int i = 0;
-	for (ft::map<int, size_t>::iterator it = m.begin(); it != m.end(); it++, i++) {
+	for (ft::map<int, size_t>::iterator it = m.begin(); it != m.end(); i++) {
+		std::cout << it->first << " " << it->second << std::endl;
 		assert(it->second == i);
+		it++;
 	}
 
 	ft::map<int, size_t, std::greater<int> > m2;
