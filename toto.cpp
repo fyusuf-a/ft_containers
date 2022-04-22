@@ -4,15 +4,7 @@
 #include <functional>
 #include <stdexcept>
 
-/*T container(char* tab) {
-	T c;
-	for (int i = 0; tab[i] != '\0'; i++) {
-		c.push_back(tab[i]);
-	}
-	return c;
-}*/
-
-void test_miscellaneous() {
+/*void test_miscellaneous() {
 	ft::map<int, std::string> m;
 	m.insert(ft::pair<const int, std::string>(0, "hello"));
 	try {
@@ -23,6 +15,17 @@ void test_miscellaneous() {
 	}
 	m[1];
 	assert(m.at(1) == "");
+
+	// Testing iterators
+	ft::map<int, size_t> my_map;
+	for (int i = 0; i < 10; i++) {
+		my_map.insert(ft::pair<const int, size_t>(i, i));
+	}
+
+	ft::map<int, size_t>::const_iterator my_it = my_map.begin();
+	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
+		assert(my_it->first == my_it->second);
+	}
 
 	ft::map<int, size_t> m1;
 	for (int i = 0; i < 10; i++) {
@@ -40,6 +43,74 @@ void test_miscellaneous() {
 		assert(it->second == jt->second);
 	}
 	assert(jt == m2.end());
+
+	// Testing empty
+	assert(!m1.empty());
+	assert(!m2.empty());
+
+	// Testing erase
+	assert(m1.size() == 10);
+	assert(m2.size() == 10);
+	m1.erase(0);
+	assert(m1.find(0) == m1.end());
+	m2.erase(0);
+	assert(m2.find(0) == m2.end());
+	assert(m1.size() == 9);
+
+	it = m1.rbegin();
+	jt = m2.begin();
+	for (; it != m1.rend(); it++, jt++) {
+		assert(jt != m2.end());
+		assert(it->first == jt->first);
+		assert(it->second == jt->second);
+	}
+
+	// Testing clear
+	m1.erase(1);
+	assert(m1.find(1) == m1.end());
+	assert(m1.size() == 8);
+	m1.clear();
+	assert(m1.size() == 0);
+	for (ft::map<int, size_t>::iterator it = m1.begin(); it != m1.end(); it++) {
+		assert(false);
+	}
+
+	// Testing overload of insert
+	m1.insert(m2.begin(), m2.end());
+	assert(m1.size() == m2.size());
+
+	it = m1.rbegin();
+	jt = m2.begin();
+	for (; it != m1.rend(); it++, jt++) {
+		assert(jt != m2.end());
+		assert(it->first == jt->first);
+		assert(it->second == jt->second);
+	}
+	
+}
+
+void test_swap_and_operator_equal() {
+	ft::map<int, size_t> m1;
+	ft::map<int, size_t> m2;
+	m1.insert(ft::pair<const int, size_t>(0, 6));
+	m1.swap(m2);
+	assert(m1.size() == 0);
+	assert(m2.size() == 1);
+	assert(m2.find(0)->second == 6);
+
+	m2.clear();
+	m2.insert(ft::pair<const int, size_t>(1, 1));
+	m2.insert(ft::pair<const int, size_t>(2, 2));
+	m2.insert(ft::pair<const int, size_t>(3, 3));
+	m1 = m2;
+	assert(m1.size() == 3);
+	assert(m1.find(1)->second == 1);
+	assert(m1.find(2)->second == 2);
+	assert(m1.find(3)->second == 3);
+	//assert(m1 == m2);
+
+
+
 
 }
 
@@ -95,15 +166,25 @@ void test_constructor() {
 		assert(it->first == jt->first);
 		assert(&*it != &*jt);
 	}
-}
+}*/
 
 int main() {
 
 	ft::map<int, std::string> m;
 
-	test_constructor();
+	ft::map<int, size_t> my_map;
+	for (int i = 0; i < 10; i++) {
+		my_map.insert(ft::pair<const int, size_t>(i, i));
+	}
+
+	ft::map<int, size_t>::const_iterator my_it = my_map.begin();
+	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
+		assert(my_it->first == my_it->second);
+	}
+	/*test_constructor();
 	test_miscellaneous();
-	std::cout << "OK" << std::endl;
+	test_swap_and_operator_equal();
+	std::cout << "OK" << std::endl;*/
 }
 
 

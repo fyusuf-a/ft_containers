@@ -23,8 +23,8 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	typedef const value_type&	 									const_reference;
 	typedef typename Alloc::pointer									pointer;
 	typedef typename Alloc::const_pointer							const_pointer;
-	typedef NodeIterator<K, V, Compare, Alloc>						iterator;
-	typedef NodeIterator<K, const V, Compare, Alloc>				const_iterator;
+	typedef NodeIterator<K, V>										iterator;
+	typedef NodeConstIterator<K, V>									const_iterator;
 	typedef ft::reverse_iterator<iterator>							reverse_iterator;
 	typedef ft::reverse_iterator<const_iterator>					const_reverse_iterator;
 
@@ -127,10 +127,10 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 
 	const V& at(const key_type& key) const
 	{
-		node_type* searched_node = _find(key);
+		node_type* searched_node = this->_find(key);
 		if (searched_node == nullptr)
 			throw std::out_of_range("ft::map::at");
-		return searched_node->_value.second;
+		return searched_node->data.second;
 	}
 
 	V& operator[](const key_type& key)
@@ -141,16 +141,16 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Iterators
 
 	iterator begin() {
-		return iterator(this, this->_first);
+		return iterator(this->_first, this->_first, this->_last);
 	}
 	const_iterator begin() const {
-		return const_iterator(this, this->_first);
+		return const_iterator(this->_first, this->_first, this->_last);
 	}
 	iterator end() {
-		return iterator(this, nullptr);
+		return iterator(nullptr, this->_first, this->_last);
 	}
 	const_iterator end() const {
-		return const_iterator(this, nullptr);
+		return const_iterator(nullptr, this->_first, this->_last);
 	}
 	reverse_iterator rbegin() {
 		return reverse_iterator(end());
@@ -185,17 +185,17 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 		node_type* node = this->_insert(value.first, value.second);
 		this->update_first_and_last();
 		if (this->size() == size + 1)
-			return ft::make_pair(iterator(this, node), true);
+			return ft::make_pair(iterator(node, this->_first, this->_last), true);
 		else
-			return ft::make_pair(iterator(this, node), false);
+			return ft::make_pair(iterator(node, this->_first, this->_last), false);
 	}
 
 	iterator insert(iterator hint, const value_type& value) {
-		if (_find(value.first) != nullptr)
+		if (this->_find(value.first) != nullptr)
 			return end();
-		iterator ret = iterator(this, _insert(value.first, value.second, hint._node));
+		node_type* ret_node = _insert(value.first, value.second, hint._node);
 		this->update_first_and_last();
-		return ret;
+		return iterator(ret_node, this->_first, this->_last);
 	}
 
 	template<class InputIt>
@@ -207,7 +207,11 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 
 	void erase(iterator pos)
 	{
-		_erase(pos);
+		node_type* node_to_delete = nullptr;
+		begin_erase(pos._node, pos._node->key, &node_to_delete);
+		assert(node_to_delete != nullptr);
+		this->_size -= 1;
+		this->end_erase(node_to_delete);
 		this->update_first_and_last();
 	}
 
@@ -220,7 +224,7 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 
 	size_type erase(const key_type& key)
 	{
-		size_type ret = _erase(key);
+		size_type ret = this->_erase(key);
 		this->update_first_and_last();
 		return ret;
 	}
@@ -229,7 +233,7 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	{
 		ft::swap(this->_compare, other._compare);
 		ft::swap(this->_root, other._root);
-		ft::swap(this->_size, other.size);
+		ft::swap(this->_size, other._size);
 		ft::swap(this->_first, other._first);
 		ft::swap(this->_last, other._last);
 	}
@@ -237,15 +241,15 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	// Lookup
 	
 	size_t count(const K& key) const {
-		return _find(key) == nullptr ? 0 : 1;
+		return this->_find(key) == nullptr ? 0 : 1;
 	}
 
 	iterator find(const K& key) {
-		return iterator(this, _find(key));
+		return iterator(this->_find(key), this->_first, this->_last);
 	}
 
 	const_iterator find(const K& key) const {
-		return const_iterator(this, _find(key));
+		return const_iterator(this->_find(key), this->_first, this->_last);
 	}
 
 	ft::pair<iterator, iterator> equal_range(const K& key) {
@@ -299,15 +303,17 @@ class map : public BinaryTree<K, V, Compare, Alloc>
 	}
 };
 
-template<class K, class V, class Compare, class Alloc>
+/*template<class K, class V, class Compare, class Alloc>
 bool operator==(const map<K, V, Compare, Alloc>& lhs, const map<K, V, Compare, Alloc>& rhs) {
 	if (lhs.size() != rhs.size())
 		return false;
-	for (size_t i = 0; i < lhs.size(); i++)
-		if (lhs[i] != rhs[i])
+	typename ft::map<K, V, Compare, Alloc>::const_iterator it = lhs.begin();
+	for (typename ft::map<K, V, Compare, Alloc>::const_iterator jt = rhs.begin(); jt != rhs.end(); ++it, ++jt) {
+		if (*it != *jt)
 			return false;
+	}
 	return true;
-}
+}*/
 
 template<class K, class V, class Compare, class Alloc>
 bool operator!=(const map<K, V, Compare, Alloc>& lhs, const map<K, V, Compare, Alloc>& rhs) {

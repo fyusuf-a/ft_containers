@@ -24,7 +24,7 @@ namespace ft {
 	void check_properties(const BinaryTree<K, V>& tree) {
 		BinaryTree<K, V>::node_type::check_parent(tree.getRoot());
 		BinaryTree<K, V>::node_type::check_balance(tree.getRoot());
-		BinaryTree<K, V>::node_type::check_order(tree.getRoot());
+		BinaryTree<K, V>::check_order(tree.getRoot());
 		check_size(tree);
 	}
 
@@ -48,7 +48,7 @@ namespace ft {
 	void wrapper_erase(BinaryTree<K, V>& tree, K key) {
 		BinaryTree<K, V>::size_type size_before = tree.size();
 		BinaryTree<K, V>::node_type* node_present = tree._find(key);
-		tree.erase(key);
+		tree._erase(key);
 		check_properties(tree);
 		if (node_present)
 			assert(tree.size() == size_before - 1);

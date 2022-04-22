@@ -18,9 +18,124 @@ namespace ft {
 template<class K, class V, class Compare, class Alloc>
 class BinaryTree;
 
-template<class K, class V, class Compare, class Alloc>
+template<class K, class V>
+class Node;
+
+template<class K, class V>
+class NodeIterator;
+
+template<class K, class V>
+
+template<class K, class V>
+class NodeConstIterator {
+	template<class K2, class V2>
+	friend class Node;
+
+	friend class NodeIterator<K, V>;
+
+	public:
+	typedef bidirectional_iterator_tag						iterator_category;
+	typedef ft::pair<const K, const V>						value_type;
+	typedef ptrdiff_t										difference_type;
+	typedef ft::pair<const K, const V>*						pointer;
+	typedef ft::pair<const K, const V>&						reference;
+	typedef ft::Node<K, V>									node_type;
+
+	protected:
+	node_type*							_node;
+	node_type*							_first;
+	node_type*							_last;
+
+
+	public:
+	NodeConstIterator()
+		: _node(nullptr)
+		, _first(nullptr)
+		, _last(nullptr)
+	{}
+
+	explicit NodeConstIterator(node_type* n, node_type* first, node_type* last)
+		: _node(n)
+		, _first(first)
+		, _last(last)
+	{}
+
+	template<class K2, class V2>
+	NodeConstIterator(const NodeConstIterator<K2, V2>& other)
+		: _node(other._node)
+		, _first(other._first)
+		, _last(other._last)
+	{}
+
+	template<class K2, class V2>
+	NodeConstIterator& operator=(const NodeConstIterator<K2, V2>& other) {
+		if (this != &other) {
+			_node = other._node;
+			_first = other._first;
+			_last = other._last;
+		}
+		return *this;
+	}
+
+	reference operator*() const {
+		return _node->data;
+	}
+	
+	pointer operator->() const {
+		return &(operator*());
+	}
+
+	NodeConstIterator operator++() {
+		if (!_node) {
+			_node = _first;
+			return *this;
+		}
+		if (_node == _last) {
+			_node = nullptr;
+			return *this;
+		}
+		_node = _node->next(_node);
+		return *this;
+	}
+
+	NodeConstIterator operator--() {
+		if (!_node) {
+			_node = _last;
+			return *this;
+		}
+		if (_node == _first) {
+			_node = nullptr;
+			return *this;
+		}
+		_node = _node->prev(_node);
+		return *this;
+	}
+
+	NodeConstIterator operator++(int) {
+		NodeConstIterator tmp = *this;
+		operator++();
+		return tmp;
+	}
+
+	NodeConstIterator operator--(int) {
+		NodeConstIterator tmp = *this;
+		operator--();
+		return tmp;
+	}
+
+	friend bool operator==(const NodeConstIterator<K, V>& lhs, const NodeConstIterator<K, const V>& rhs) {
+		return lhs._node == rhs._node;
+	}
+
+	friend bool operator!=(const NodeConstIterator<K, V>& lhs, const NodeConstIterator<K, V>& rhs) {
+		return !(lhs == rhs);
+	}
+};
+
+template<class K, class V>
 class NodeIterator {
-	friend class BinaryTree<K, V, Compare, Alloc>;
+	template<class K2, class V2>
+	friend class Node;
 
 	public:
 	typedef bidirectional_iterator_tag						iterator_category;
@@ -28,28 +143,46 @@ class NodeIterator {
 	typedef ptrdiff_t										difference_type;
 	typedef ft::pair<const K, V>*							pointer;
 	typedef ft::pair<const K, V>&							reference;
-	typedef BinaryTree<K, V, Compare, Alloc>				tree_type;
-	typedef typename tree_type::Node						node_type;
-	//typedef node_type*										iterator;
+	typedef ft::Node<K, const V>							node_type;
 
-	//protected:
-	public: // TODO : remove
+	protected:
 	node_type*							_node;
-	tree_type*							_tree;
+	node_type*							_first;
+	node_type*							_last;
 
 
 	public:
-	NodeIterator() : _tree(), _node(nullptr) {}
+	// Conversion to const iterator
+	operator NodeConstIterator<K, V>() const {
+		return NodeConstIterator<K, V>(_node, _first, _last);
+	}
 
-	explicit NodeIterator(tree_type* t, node_type* n) : _tree(t), _node(n) {}
+	NodeIterator()
+		: _node(nullptr)
+		, _first(nullptr)
+		, _last(nullptr)
+	{}
 
-	template<class K2, class V2, class Compare2>
-	NodeIterator(const NodeIterator<K2, V2, Compare2, Alloc>& other) : _node(other.node) {}
+	explicit NodeIterator(node_type* n, node_type* first, node_type* last)
+		: _node(n)
+		, _first(first)
+		, _last(last)
+	{}
 
-	template<class K2, class V2, class Compare2>
-	NodeIterator& operator=(const NodeIterator<K2, V2, Compare2, Alloc>& other) {
-		_tree = other._tree;
-		_node = other.node;
+	template<class K2, class V2>
+	NodeIterator(const NodeIterator<K2, V2>& other)
+		: _node(other._node)
+		, _first(other._first)
+		, _last(other._last)
+	{}
+
+	template<class K2, class V2>
+	NodeIterator& operator=(const NodeIterator<K2, V2>& other) {
+		if (this != &other) {
+			_node = other._node;
+			_first = other._first;
+			_last = other._last;
+		}
 		return *this;
 	}
 
@@ -63,10 +196,10 @@ class NodeIterator {
 
 	NodeIterator operator++() {
 		if (!_node) {
-			_node = _tree->_first;
+			_node = _first;
 			return *this;
 		}
-		if (_node == _tree->_last) {
+		if (_node == _last) {
 			_node = nullptr;
 			return *this;
 		}
@@ -76,10 +209,10 @@ class NodeIterator {
 
 	NodeIterator operator--() {
 		if (!_node) {
-			_node = _tree->_last;
+			_node = _last;
 			return *this;
 		}
-		if (_node == _tree->_first) {
+		if (_node == _first) {
 			_node = nullptr;
 			return *this;
 		}
@@ -99,11 +232,11 @@ class NodeIterator {
 		return tmp;
 	}
 
-	friend bool operator==(const NodeIterator& lhs, const NodeIterator& rhs) {
+	friend bool operator==(const NodeIterator<K, V>& lhs, const NodeIterator<K, const V>& rhs) {
 		return lhs._node == rhs._node;
 	}
 
-	friend bool operator!=(const NodeIterator& lhs, const NodeIterator& rhs) {
+	friend bool operator!=(const NodeIterator<K, V>& lhs, const NodeIterator<K, V>& rhs) {
 		return !(lhs == rhs);
 	}
 };
@@ -111,249 +244,244 @@ class NodeIterator {
 template<class K, class V, class Compare, class Alloc>
 class map;
 
+//template<class K, class V, class Compare, class Alloc>
+template<class K, class V>
+class Node {
+	/*friend class NodeIterator<K, V, Compare, Alloc>;
+	friend class BinaryTree;
+	friend class map<K, V, Compare, Alloc>;*/
+
+
+private:
+	typedef char	int8_t;
+	
+#ifdef FT_TEST
+public:
+#else
+protected:
+#endif
+	ft::pair<const K, V> data;
+	Node* left;
+	Node* right;
+	Node* parent;
+	int8_t balance_factor;
+
+public:
+	operator Node<K, const V>() {
+		return Node<K, const V>(data, left, right, parent, balance_factor);
+	}
+
+	Node(K k, V v, Node* my_parent = 0, Node* my_left = 0, Node* my_right = 0, int8_t my_balance_factor = 0)
+		: data(k, v)
+		, left(my_left)
+		, right(my_right)
+		, parent(my_parent)
+		, balance_factor(my_balance_factor)
+	{}
+
+	static Node* minimum(Node* node) {
+		if (!node)
+			return nullptr;
+		while (node->left)
+			node = node->left;
+		return node;
+	}
+
+	static Node* maximum(Node* node) {
+		if (!node)
+			return nullptr;
+		while (node->right)
+			node = node->right;
+		return node;
+	}
+
+	static bool has_left_child(const Node* node) {
+		return node->left != nullptr;
+	}
+	static bool has_right_child(const Node* node) {
+		return node->right != nullptr;
+	}
+	static bool is_left_child(const Node* node) {
+		return node->parent != nullptr && node->parent->left == node; }
+	static bool is_right_child(const Node* node) {
+		return node->parent != nullptr && node->parent->right == node;
+	}
+	static bool is_root(const Node* node) {
+		return node->parent == nullptr;
+	}
+
+	static Node* next(Node* node) {
+		if (node->right != nullptr) {
+			return minimum(node->right);
+		}
+		Node* parent = node->parent;
+		while (parent != nullptr && node == parent->right) {
+			node = parent;
+			parent = parent->parent;
+		}
+		return parent;
+	}
+
+	static Node* prev(Node* node) {
+		if (node->left != nullptr) {
+			return maximum(node->left);
+		}
+		Node* parent = node->parent;
+		while (parent != nullptr && node == parent->left) {
+			node = parent;
+			parent = parent->parent;
+		}
+		return parent;
+	}
+
+	static void pretty_print(Node* node, int depth, std::ostream& os) {
+		if (node == nullptr) return;
+		pretty_print(node->right, depth + 1, os);
+		for (int i = 0; i < depth; i++) std::cout << "  ";
+		std::ostringstream oss;
+		if (node->parent)
+			oss << node->parent->data.first;
+		else
+			oss << "nullptr";
+		os << node->data.first << " " << node->data.second << " (" << static_cast<int>(node->balance_factor) << ')' << " ---> " << oss.str() << std::endl;
+		pretty_print(node->left, depth + 1, os);
+	}
+
+#ifdef FT_TEST
+	public:
+	static size_t length(Node* node) {
+		if (node == nullptr)
+			return 0;
+		return 1 + std::max(length(node->left) , length(node->right));
+	}
+
+	static bool check_parent(Node* node) {
+		if (node == nullptr)
+			return true;
+		if (node->left)
+			ASSERT(node->left->parent == node);
+		if (node->right)
+			ASSERT(node->right->parent == node);
+		return check_parent(node->left) && check_parent(node->right);
+	}
+
+	static bool check_balance(Node* node) {
+		if (node == nullptr)
+			return true;
+		ASSERT(static_cast<char>(static_cast<int>(length(node->right)) - static_cast<int>(length(node->left))) == node->balance_factor);
+		if (!(node->balance_factor == 0 || node->balance_factor == 1 || node->balance_factor == -1))
+			return false;
+		return check_balance(node->left) && check_balance(node->right);
+	}
+
+	friend bool operator==(const Node& lhs, const Node& rhs) {
+		if ((lhs.left == nullptr) == !(rhs.left == nullptr))
+			return false;
+		if ((lhs.right == nullptr) == !(rhs.right == nullptr))
+			return false;
+		if (!lhs.left) {
+			if (!lhs.right)
+				return true;
+			return *lhs.right == *rhs.right;
+		}
+		else {
+			if (!lhs.right)
+				return *lhs.left == *rhs.left;
+			return *lhs.left == *rhs.left && *lhs.right == *rhs.right;
+		}
+	}
+#endif
+};
+
 template <class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<ft::pair<K, V> > >
 class BinaryTree {
-	friend class NodeIterator<K, V, Compare, Alloc>;
+	friend class NodeIterator<K, V>;
 	friend class map<K, V, Compare, Alloc>;
 
-	class Node {
-		friend class NodeIterator<K, V, Compare, Alloc>;
-		friend class BinaryTree;
-		friend class map<K, V, Compare, Alloc>;
-
-
-	private:
-		typedef char	int8_t;
-		
-#ifdef FT_TEST
 	public:
-#else
-	protected:
-#endif
-		ft::pair<const K, V> data;
-		Node* left;
-		Node* right;
-		Node* parent;
-		int8_t balance_factor;
-
-	public:
-
-		Node(K k, V v, Node* my_parent = 0, Node* my_left = 0, Node* my_right = 0, int8_t my_balance_factor = 0)
-			: data(k, v)
-			, left(my_left)
-			, right(my_right)
-			, parent(my_parent)
-			, balance_factor(my_balance_factor)
-		{}
-
-		static Node* minimum(Node* node) {
-			if (!node)
-				return nullptr;
-			while (node->left)
-				node = node->left;
-			return node;
-		}
-
-		static Node* maximum(Node* node) {
-			if (!node)
-				return nullptr;
-			while (node->right)
-				node = node->right;
-			return node;
-		}
-
-		static bool has_left_child(const Node* node) {
-			return node->left != nullptr;
-		}
-		static bool has_right_child(const Node* node) {
-			return node->right != nullptr;
-		}
-		static bool is_left_child(const Node* node) {
-			return node->parent != nullptr && node->parent->left == node; }
-		static bool is_right_child(const Node* node) {
-			return node->parent != nullptr && node->parent->right == node;
-		}
-		static bool is_root(const Node* node) {
-			return node->parent == nullptr;
-		}
-
-		static Node* find(Node* node, const K& key) {
-			if (node == nullptr) {
-				return nullptr;
-			}
-			else if (Compare()(key, node->data.first)) {
-				return find(node->left, key);
-			}
-			else if (Compare()(node->data.first, key)) {
-				return find(node->right, key);
-			}
-			else
-				return node;
-		}
-
-		static Node* next(Node* node) {
-			if (node->right != nullptr) {
-				return minimum(node->right);
-			}
-			Node* parent = node->parent;
-			while (parent != nullptr && node == parent->right) {
-				node = parent;
-				parent = parent->parent;
-			}
-			return parent;
-		}
-
-		static Node* prev(Node* node) {
-			if (node->left != nullptr) {
-				return maximum(node->left);
-			}
-			Node* parent = node->parent;
-			while (parent != nullptr && node == parent->left) {
-				node = parent;
-				parent = parent->parent;
-			}
-			return parent;
-		}
-
-		// returns a new root for the tree
-		static Node* rotateLeft(Node* root) {
-			Node* newRoot = root->right;
-			root->right = newRoot->left;
-			if (newRoot->left)
-				newRoot->left->parent = root;
-			newRoot->parent = root->parent;
-			if (is_left_child(root))
-				root->parent->left = newRoot;
-			else if (is_right_child(root))
-				root->parent->right = newRoot;
-			newRoot->left = root;
-			root->parent = newRoot;
-			root->balance_factor = root->balance_factor - 1 - ft::max<char>(newRoot->balance_factor, 0);
-			newRoot->balance_factor = newRoot->balance_factor - 1 + ft::min<char>(root->balance_factor, 0);
-			return newRoot;
-		}
-
-		// returns a new root for the tree
-		static Node* rotateRight(Node* root) {
-			Node* newRoot = root->left;
-			root->left = newRoot->right;
-			if (newRoot->right)
-				newRoot->right->parent = root;
-			newRoot->parent = root->parent;
-			if (is_left_child(root))
-				root->parent->left = newRoot;
-			else if (is_right_child(root))
-				root->parent->right = newRoot;
-			newRoot->right = root;
-			root->parent = newRoot;
-			root->balance_factor = root->balance_factor + 1 - ft::min<char>(newRoot->balance_factor, 0);
-			newRoot->balance_factor = newRoot->balance_factor + 1 + ft::max<char>(root->balance_factor, 0);
-			ASSERT(root->parent->right == root);
-			return newRoot;
-		}
-
-		// returns a new root for the tree, this function should only be called if
-		// the node's balance factor is 2 or -2
-		static Node* rebalance(Node* node) {
-			if (node->balance_factor == 2) {
-				if (node->right->balance_factor == -1)
-					rotateRight(node->right);
-				return rotateLeft(node);
-			}
-			else if (node->balance_factor == -2) {
-				if (node->left->balance_factor == 1)
-					rotateLeft(node->left);
-				return rotateRight(node);
-			}
-			throw std::runtime_error("rebalance: node has wrong balance factor");
-		}
-
-		static void pretty_print(Node* node, int depth, std::ostream& os) {
-			if (node == nullptr) return;
-			pretty_print(node->right, depth + 1, os);
-			for (int i = 0; i < depth; i++) std::cout << "  ";
-			std::ostringstream oss;
-			if (node->parent)
-				oss << node->parent->data.first;
-			else
-				oss << "nullptr";
-			os << node->data.first << " " << node->data.second << " (" << static_cast<int>(node->balance_factor) << ')' << " ---> " << oss.str() << std::endl;
-			pretty_print(node->left, depth + 1, os);
-		}
-
-#ifdef FT_TEST
-		public:
-		static size_t length(Node* node) {
-			if (node == nullptr)
-				return 0;
-			return 1 + std::max(length(node->left) , length(node->right));
-		}
-
-		static bool check_parent(Node* node) {
-			if (node == nullptr)
-				return true;
-			if (node->left)
-				ASSERT(node->left->parent == node);
-			if (node->right)
-				ASSERT(node->right->parent == node);
-			return check_parent(node->left) && check_parent(node->right);
-		}
-
-		static bool check_balance(Node* node) {
-			if (node == nullptr)
-				return true;
-			ASSERT(static_cast<char>(static_cast<int>(length(node->right)) - static_cast<int>(length(node->left))) == node->balance_factor);
-			if (!(node->balance_factor == 0 || node->balance_factor == 1 || node->balance_factor == -1))
-				return false;
-			return check_balance(node->left) && check_balance(node->right);
-		}
-
-		static bool check_order(Node* node) {
-			if (node == nullptr)
-				return true;
-			//if (node->left != nullptr && node->left->data.first >= node->data.first)
-			if (node->left != nullptr && !Compare()(node->left->data.first, node->data.first))
-				return false;
-			if (node->right != nullptr && !Compare()(node->data.first, node->right->data.first))
-				return false;
-			return check_order(node->left) && check_order(node->right);
-		}
-
-		friend bool operator==(const Node& lhs, const Node& rhs) {
-			if ((lhs.left == nullptr) == !(rhs.left == nullptr))
-				return false;
-			if ((lhs.right == nullptr) == !(rhs.right == nullptr))
-				return false;
-			if (!lhs.left) {
-				if (!lhs.right)
-					return true;
-				return *lhs.right == *rhs.right;
-			}
-			else {
-				if (!lhs.right)
-					return *lhs.left == *rhs.left;
-				return *lhs.left == *rhs.left && *lhs.right == *rhs.right;
-			}
-		}
-#endif
-	};
-
-	public:
-		typedef std::size_t											size_type;
-		typedef Node												node_type;
+	typedef std::size_t											size_type;
+	typedef Node<K, V>											node_type;
 	
 	private:
-		typedef typename Alloc::template rebind<node_type>::other	node_allocator;
-		typedef NodeIterator<K, V, Compare, Alloc>					iterator;
+	typedef typename Alloc::template rebind<node_type>::other	node_allocator;
+	typedef NodeIterator<K, V>									iterator;
 
 	protected:
-		node_type*				_root;
-	public: //TODO: remove public
-		node_type*				_first;
-		node_type*				_last;
-		size_type				_size;
-		node_allocator			_allocator;
-		Compare					_compare;
+	node_type*				_root;
+	node_type*				_first;
+	node_type*				_last;
+	size_type				_size;
+	node_allocator			_allocator;
+	Compare					_compare;
+	
+	private:
+	static node_type* find(node_type* node, const K& key) {
+		if (node == nullptr) {
+			return nullptr;
+		}
+		else if (Compare()(key, node->data.first)) {
+			return find(node->left, key);
+		}
+		else if (Compare()(node->data.first, key)) {
+			return find(node->right, key);
+		}
+		else
+			return node;
+	}
+
+	// returns a new root for the tree
+	static node_type* rotateLeft(node_type* root) {
+		node_type* newRoot = root->right;
+		root->right = newRoot->left;
+		if (newRoot->left)
+			newRoot->left->parent = root;
+		newRoot->parent = root->parent;
+		if (node_type::is_left_child(root))
+			root->parent->left = newRoot;
+		else if (node_type::is_right_child(root))
+			root->parent->right = newRoot;
+		newRoot->left = root;
+		root->parent = newRoot;
+		root->balance_factor = root->balance_factor - 1 - ft::max<char>(newRoot->balance_factor, 0);
+		newRoot->balance_factor = newRoot->balance_factor - 1 + ft::min<char>(root->balance_factor, 0);
+		return newRoot;
+	}
+
+	// returns a new root for the tree
+	static node_type* rotateRight(node_type* root) {
+		node_type* newRoot = root->left;
+		root->left = newRoot->right;
+		if (newRoot->right)
+			newRoot->right->parent = root;
+		newRoot->parent = root->parent;
+		if (node_type::is_left_child(root))
+			root->parent->left = newRoot;
+		else if (node_type::is_right_child(root))
+			root->parent->right = newRoot;
+		newRoot->right = root;
+		root->parent = newRoot;
+		root->balance_factor = root->balance_factor + 1 - ft::min<char>(newRoot->balance_factor, 0);
+		newRoot->balance_factor = newRoot->balance_factor + 1 + ft::max<char>(root->balance_factor, 0);
+		ASSERT(root->parent->right == root);
+		return newRoot;
+	}
+
+	// returns a new root for the tree, this function should only be called if
+	// the node's balance factor is 2 or -2
+	static node_type* rebalance(node_type* node) {
+		if (node->balance_factor == 2) {
+			if (node->right->balance_factor == -1)
+				rotateRight(node->right);
+			return rotateLeft(node);
+		}
+		else if (node->balance_factor == -2) {
+			if (node->left->balance_factor == 1)
+				rotateLeft(node->left);
+			return rotateRight(node);
+		}
+		throw std::runtime_error("rebalance: node has wrong balance factor");
+	}
+
 
 	protected:
 		void update_first_and_last() {
@@ -433,7 +561,7 @@ class BinaryTree {
 			if (node->balance_factor > 1 || node->balance_factor < -1) {
 				// the recursion must stop after rebalancing
 				// as the height of the node is unchanged
-				node = node_type::rebalance(node);
+				node = rebalance(node);
 				_root = is_root ? node : _root;
 				return;
 			}
@@ -510,7 +638,7 @@ class BinaryTree {
 				// to know if the height of the node changes after rebalancing
 				node_type* other_child = node->balance_factor == -2 ? node->left : node->right;
 				bool stop_recursion = other_child->balance_factor == 0;
-				node = node_type::rebalance(node);
+				node = rebalance(node);
 				if (!node->parent)
 					_root = node;
 				if (stop_recursion)
@@ -627,7 +755,7 @@ class BinaryTree {
 #else
 	protected:
 #endif
-		size_type erase(const K& key) {
+		size_type _erase(const K& key) {
 			node_type* node_to_delete = nullptr;
 			begin_erase(_root, key, &node_to_delete);
 			if (node_to_delete) { // if the key appears and a node has to be deleted
@@ -648,19 +776,30 @@ class BinaryTree {
 
 		// find a key-value pair
 		node_type* _find(const K& key) const {
-			return node_type::find(_root, key);
+			return find(_root, key);
 		}
 
 #ifdef FT_TEST
 	public:
-		// print the tree
-		void print(std::ostream& os) const {
-			print(_root, os);
-		}
-		// print the tree
-		void pretty_print(std::ostream& os) const {
-			node_type::pretty_print(_root, 0, os);
-		}
+	// print the tree
+	void print(std::ostream& os) const {
+		print(_root, os);
+	}
+
+	// print the tree
+	void pretty_print(std::ostream& os) const {
+		node_type::pretty_print(_root, 0, os);
+	}
+
+	static bool check_order(node_type* node) {
+		if (node == nullptr)
+			return true;
+		if (node->left != nullptr && !Compare()(node->left->data.first, node->data.first))
+			return false;
+		if (node->right != nullptr && !Compare()(node->data.first, node->right->data.first))
+			return false;
+		return check_order(node->left) && check_order(node->right);
+	}
 #endif
 
 };
