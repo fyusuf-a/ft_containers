@@ -1,5 +1,6 @@
 STL.pdf
 tests/miscellaneous
 tests/tree_test
+tests/map
 tests/vector
 

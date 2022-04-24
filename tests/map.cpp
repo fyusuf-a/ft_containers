@@ -1,10 +1,10 @@
 #define FT_TEST
-#include "map.hpp"
-#include "utility.hpp"
+#include "../map.hpp"
+#include "../utility.hpp"
 #include <functional>
 #include <stdexcept>
 
-/*void test_miscellaneous() {
+void test_miscellaneous() {
 	ft::map<int, std::string> m;
 	m.insert(ft::pair<const int, std::string>(0, "hello"));
 	try {
@@ -24,7 +24,7 @@
 
 	ft::map<int, size_t>::const_iterator my_it = my_map.begin();
 	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
-		assert(my_it->first == my_it->second);
+		assert(static_cast<size_t>(my_it->first) == my_it->second);
 	}
 
 	ft::map<int, size_t> m1;
@@ -107,11 +107,7 @@ void test_swap_and_operator_equal() {
 	assert(m1.find(1)->second == 1);
 	assert(m1.find(2)->second == 2);
 	assert(m1.find(3)->second == 3);
-	//assert(m1 == m2);
-
-
-
-
+	assert(m1 == m2);
 }
 
 void test_constructor() {
@@ -124,12 +120,12 @@ void test_constructor() {
 	}
 	assert(m.size() == 10);
 	for (int i = 0; i < 10; i++) {
-		assert(m.at(i) == i);
-		assert(m[i] == i);
+		assert(static_cast<int>(m.at(i)) == i);
+		assert(static_cast<int>(m[i]) == i);
 	}
 	int i = 0;
 	for (ft::map<int, size_t>::iterator it = m.begin(); it != m.end(); i++) {
-		assert(it->second == i);
+		assert(static_cast<int>(it->second) == i);
 		it++;
 	}
 
@@ -141,11 +137,11 @@ void test_constructor() {
 	}
 	assert(m2.size() == 10);
 	for (int i = 0; i < 10; i++) {
-		assert(m2.at(i) == i);
+		assert(static_cast<int>(m2.at(i)) == i);
 	}
 	i = 0;
 	for (ft::map<int, size_t, std::greater<int> >::iterator it = m2.begin(); it != m2.end(); it++, i++) {
-		assert(it->second == 9 - i);
+		assert(static_cast<int>(it->second) == 9 - i);
 	}
 
 	// Testing constructor with iterators
@@ -166,25 +162,49 @@ void test_constructor() {
 		assert(it->first == jt->first);
 		assert(&*it != &*jt);
 	}
-}*/
+}
 
-int main() {
-
-	ft::map<int, std::string> m;
-
+void test_iterator() {
 	ft::map<int, size_t> my_map;
 	for (int i = 0; i < 10; i++) {
-		my_map.insert(ft::pair<const int, size_t>(i, i));
+		my_map.insert(ft::pair<int, size_t>(i, i));
 	}
 
-	ft::map<int, size_t>::const_iterator my_it = my_map.begin();
+	ft::map<int, size_t>::iterator my_it = my_map.begin();
 	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
-		assert(my_it->first == my_it->second);
+		assert(static_cast<size_t>(my_it->first) == my_it->second);
+		my_it->second = my_it->second + 1;
 	}
-	/*test_constructor();
+}
+
+void test_count_and_bounds() {
+	ft::map <int, size_t> m;
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 15; j++) {
+			if (j < i) {
+				assert(m.count(j) == 1);
+				assert(m.find(j) != m.end());
+			}
+			else {
+				assert(m.count(j) == 0);
+				assert(m.find(j) == m.end());
+			}
+		}
+		m.insert(ft::pair<int, size_t>(i, i));
+	}
+	assert(m.lower_bound(5) == m.find(5));
+	assert(m.upper_bound(5) == m.find(6));
+	assert(m.lower_bound(9) == m.find(9));
+	assert(m.upper_bound(9) == m.end());
+}
+
+int main() {
+	test_constructor();
 	test_miscellaneous();
+	test_iterator();
 	test_swap_and_operator_equal();
-	std::cout << "OK" << std::endl;*/
+	test_count_and_bounds();
+	std::cout << "OK" << std::endl;
 }
 
 

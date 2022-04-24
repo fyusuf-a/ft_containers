@@ -241,6 +241,8 @@ int main()
 	test_insert_erase();
 	test_resize_swap();
 	test_various();
+
+	std::cout << "OK" << std::endl;
     return 0;
 }
 
