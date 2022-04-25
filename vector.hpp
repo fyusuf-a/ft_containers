@@ -86,9 +86,17 @@ class vector {
 		}
 
 		// assign
-		void assign(size_type count, const T& value) {
+		inline void _assign(size_type count, const T& value) {
 			clear();
-			insert(begin(), count, value);
+			_insert(begin(), count, value);
+		}
+		void assign(size_type count, const T& value) {
+			if (_start <= &value && &value <= _end) {
+				T v = value;
+				_assign(count, v);
+			}
+			else
+				_assign(count, value);
 		}
 		template<class InputIt>
 		void assign(InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last) {
@@ -193,10 +201,18 @@ class vector {
 		}
 
 		iterator insert(iterator pos, const T& value) {
+			if (pos <= &value && &value <= _end) {
+				T v = value;
+				return _insert(pos, 1, v);
+			}
 			return _insert(pos, 1, value);
 		}
 
 		void insert(iterator pos, size_type count, const T& value) {
+			if (pos <= &value && &value <= _end) {
+				T v = value;
+				_insert(pos, count, v);
+			}
 			_insert(pos, count, value);
 		}
 
@@ -266,11 +282,16 @@ class vector {
 		}
 
 		void push_back(const T& value) {
-			if (2 * size() + 1 <= max_size())
-				reserve(2 * size() + 1);
+			if (_end == _end_capacity) {
+				T v = value; // because reserve can change the reference value (e.g if value = front())
+				if (2 * size() + 1 <= max_size())
+					reserve(2 * size() + 1);
+				else
+					reserve(size() + 1);
+				_allocator.construct(_end, v);
+			}
 			else
-				reserve(size() + 1);
-			_allocator.construct(_end, value);
+				_allocator.construct(_end, value);
 			++_end;
 		}
 
