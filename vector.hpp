@@ -177,7 +177,7 @@ class vector {
 		}
 		void reserve(size_type new_cap) {
 			if (new_cap >= max_size())
-				throw std::length_error("vector::reserve: new size is too big");
+				throw std::length_error("vector::reserve");
 			if (new_cap > capacity()) {
 				size_t old_size = size();
 				pointer new_start = _allocator.allocate(new_cap);
@@ -219,10 +219,8 @@ class vector {
 		private:
 		iterator _insert(iterator pos, size_type count, const T& value) {
 			difference_type index = pos - begin();
-			if (2 * size() + count <= max_size())
-				reserve(2 * size() + count);
-			else
-				reserve(size() + count);
+			if (size() + count > capacity())
+				reserve(ft::max(2 * size(), size() + count));
 			iterator it;
 			for (it = _start + size() + count - 1; it >= _start + index + count; it--) {
 				if (it >= _start + size())
@@ -245,10 +243,8 @@ class vector {
 		void insert(iterator pos, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type first, InputIt last) {
 			difference_type index = pos - begin();
 			size_t count = ft::distance(first, last);
-			if (2 * size() + count < max_size())
-				reserve(2 * size() + count);
-			else
-				reserve(size() + count);
+			if (size() + count > capacity())
+				reserve(ft::max(2 * size(), size() + count));
 			iterator it;
 			for (it = _start + size() + count - 1; it >= _start + index + count; it--)
 			{
@@ -282,12 +278,9 @@ class vector {
 		}
 
 		void push_back(const T& value) {
-			if (_end == _end_capacity) {
+			if (size() + 1 > capacity()) {
 				T v = value; // because reserve can change the reference value (e.g if value = front())
-				if (2 * size() + 1 <= max_size())
-					reserve(2 * size() + 1);
-				else
-					reserve(size() + 1);
+				reserve(ft::max<size_type>(1, 2 * capacity()));
 				_allocator.construct(_end, v);
 			}
 			else
@@ -303,10 +296,11 @@ class vector {
 		void resize(size_type count, T c = T()) {
 			size_type old_size = size();
 			if (count > old_size) {
-				if (2 * count <= max_size())
+				reserve(ft::max<size_type>(2 * size(), count));
+				/*if (2 * count <= max_size())
 					reserve(2 * count);
 				else
-					reserve(count);
+					reserve(count);*/
 				for (size_type i = old_size; i < count; i++)	
 					_allocator.construct(_start + i, c);
 				_end = _start + count;

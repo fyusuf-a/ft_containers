@@ -22,7 +22,7 @@ void test_constructor() {
 	// Testing constructor with size...
 	ft::vector<int> v0(2);
 	assert(v0.size() == 2);
-	assert(v0.capacity() == 2);
+	assert(v0.capacity() >= 2);
 
 	// Testing constructor with size and value...
 	ft::vector<int> v1(2, -5);
@@ -130,11 +130,11 @@ void test_assign_and_reserve() {
 
 	ft::vector<int> v2(2, -7);
 	assert(v2.size() == 2);
-	assert(v2.capacity() == 2);
+	assert(v2.capacity() >= 2);
 	assert(!v2.empty());
 	v2.reserve(3);
 	assert(v2.size() == 2);
-	assert(v2.capacity() == 3);
+	assert(v2.capacity() >= 3);
 	assert(v2[0] == -7 && v2[1] == -7);
 
 	v2.assign(5, -12);
