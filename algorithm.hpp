@@ -130,7 +130,6 @@ namespace ft
 	{
 		return a < b ? a : b;
 	}
-	
 };
 
 

@@ -180,6 +180,22 @@ typename reverse_iterator<Iter1>::difference_type operator-(const ft::reverse_it
 	return rhs.base() - lhs.base();
 }
 
+template<class InputIt>
+InputIt next(InputIt first, typename ft::iterator_traits<InputIt>::difference_type n = 1)
+{
+	while (n--)
+		++first;
+	return first;
+}
+
+template<class BidirectionalIt>
+BidirectionalIt prev(BidirectionalIt first, typename ft::iterator_traits<BidirectionalIt>::difference_type n = 1)
+{
+	while (n--)
+		--first;
+	return first;
+}
+	
 } // namespace ft
 
 

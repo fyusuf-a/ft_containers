@@ -6,6 +6,18 @@
 
 namespace ft {
 
+template<class K, class V, class Compare, class Alloc>
+class map;
+
+template<typename K, typename V, typename Compare, typename Alloc>
+void print_lol(ft::map<K, V, Compare, Alloc> const &map)
+{
+	typename ft::map<K, V, Compare, Alloc>::const_iterator it;
+
+	for (it = map.begin(); it != map.end(); it++)
+		std::cout << it->first << " => " << it->second << std::endl;
+}
+
 // a tree, but with iterators
 template<class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<ft::pair<const K, V> > >
 class map : public BinaryTree<ft::pair<const K, V> >
@@ -48,11 +60,11 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		node_type* new_node = _allocator.allocate(1, node);
 		new (new_node) node_type(value_type(k, v), node->parent,
 				node->left, node->right, node->balance_factor);
-		ASSERT(new_node->data.first == k);
-		ASSERT(new_node->data.second == v);
-		ASSERT(new_node->parent == node->parent);
-		ASSERT(new_node->left == node->left);
-		ASSERT(new_node->right == node->right);
+		MY_ASSERT(new_node->data.first == k);
+		MY_ASSERT(new_node->data.second == v);
+		MY_ASSERT(new_node->parent == node->parent);
+		MY_ASSERT(new_node->left == node->left);
+		MY_ASSERT(new_node->right == node->right);
 		if (node_type::is_left_child(node))
 			node->parent->left = new_node;
 		else if (node_type::is_right_child(node))
@@ -124,17 +136,13 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		InputIt it = first;
 		K this_key;
 		K last_key;
-		V this_value;
-		V last_value;
 		node_type* this_node = nullptr;
 		for (; it != last; ++it) {
 			this_key = it->first;
-			this_value = it->second;
-			this_node = this->_insert(this_node, this_key, this_value);
+			this_node = this->_insert(this_node, this_key, it->second);
 			if (it != first && (comp(this_key, last_key) || this_key == last_key))
 				break;
 			last_key = this_key;
-			last_value = this_value;
 		}
 		if (it == last) {
 			this->update_first_and_last();
@@ -327,9 +335,9 @@ class map : public BinaryTree<ft::pair<const K, V> >
 				node_type* new_node = _allocator.allocate(1, node);
 				new (new_node) node_type(value_type(k, v), node);
 				node->left = new_node; 
-				ASSERT(node->left->parent == node);
+				MY_ASSERT(node->left->parent == node);
 				_size += 1;
-				ASSERT(node->left != 0);
+				MY_ASSERT(node->left != 0);
 				update_balance_insert(node->left);
 				return new_node;
 			}
@@ -341,9 +349,9 @@ class map : public BinaryTree<ft::pair<const K, V> >
 				node_type* new_node = _allocator.allocate(1, node);
 				new (new_node) node_type(value_type(k, v), node);
 				node->right = new_node;
-				ASSERT(node->right->parent == node);
+				MY_ASSERT(node->right->parent == node);
 				_size += 1;
-				ASSERT(node->right != 0);
+				MY_ASSERT(node->right != 0);
 				update_balance_insert(node->right);
 				return new_node;
 			}
@@ -365,9 +373,9 @@ class map : public BinaryTree<ft::pair<const K, V> >
 	iterator insert(iterator hint, const value_type& value) {
 		if (this->_find(value.first) != nullptr)
 			return end();
-		node_type* ret_node = _insert(value.first, value.second, hint._node);
+		node_type* ret_node = _insert(hint._node, value.first, value.second);
 		this->update_first_and_last();
-		return iterator(ret_node, this->_first, this->_last);
+		return iterator(this, ret_node);
 	}
 
 	template<class InputIt>
@@ -432,6 +440,7 @@ private:
 	// ancestors
 	// please note that node_to_delete, if not null, does not have any children
 	void end_erase(node_type* node_to_delete) {
+		//std::cout << "end_erase with key " << node_to_delete->data.first << std::endl;
 		if (!node_to_delete->parent)
 			this->_root = nullptr;
 		else
@@ -474,18 +483,30 @@ private:
 	public:
 	void erase(iterator pos)
 	{
-		node_type* node_to_delete = nullptr;
-		begin_erase(pos._node, pos._node->key, &node_to_delete);
+		_erase(pos->first);
+		/*node_type* node_to_delete = nullptr;
+		begin_erase(pos._node, pos._node->data.first, &node_to_delete);
 		assert(node_to_delete != nullptr);
 		this->_size -= 1;
 		this->end_erase(node_to_delete);
-		this->update_first_and_last();
+		this->update_first_and_last();*/
 	}
 	// TODO: wrong complexity ?
 	void erase(iterator first, iterator last)
 	{
+		iterator next;
 		while (first != last)
-			erase(first++);
+		{
+			next = first;
+			next++;
+			std::cout << "deleting " << first->first << std::endl;
+			erase(first);
+			if (next == end())
+			{
+				break;
+			}
+			first = next;
+		}
 	}
 	size_type erase(const key_type& key)
 	{

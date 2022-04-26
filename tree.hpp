@@ -8,9 +8,9 @@
 #include <cstdlib>
 #define nullptr 0
 #ifdef FT_TEST
-#define ASSERT(x) assert(x)
+#define MY_ASSERT(x) assert(x)
 #else
-#define ASSERT(x)
+#define MY_ASSERT(x)
 #endif
 
 namespace ft {
@@ -31,6 +31,9 @@ template<class T>
 class NodeConstIterator {
 	template<class T2>
 	friend class Node;
+	template<class K, class V, class Compare, class Alloc>
+	friend class map;
+	friend class BinaryTree<T>;
 
 	public:
 	typedef bidirectional_iterator_tag			iterator_category;
@@ -47,11 +50,8 @@ class NodeConstIterator {
 
 
 	public:
-	/*operator NodeIterator<T>() {
-		return NodeIterator<T>(_tree, _node);
-	}*/
+	NodeConstIterator() : _tree(nullptr), _node(nullptr) {}
 
-	//explicit NodeConstIterator(const tree_type* t, const node_type* n)
 	NodeConstIterator(const tree_type* t, node_type* n)
 		: _tree(t)
 		, _node(n)
@@ -131,6 +131,9 @@ template<class T>
 class NodeIterator {
 	template<class T2>
 	friend class Node;
+	template<class K, class V, class Compare, class Alloc>
+	friend class map;
+	friend class BinaryTree<T>;
 
 	public:
 	typedef bidirectional_iterator_tag			iterator_category;
@@ -151,7 +154,8 @@ class NodeIterator {
 		return NodeConstIterator<T>(_tree, _node);
 	}
 
-	//explicit NodeIterator(tree_type* t, node_type* n)
+	NodeIterator() : _tree(nullptr), _node(nullptr) {}
+
 	NodeIterator(tree_type* t, node_type* n)
 		: _tree(t)
 		, _node(n)
@@ -227,8 +231,17 @@ class NodeIterator {
 	}
 };
 
+template<class K, class V, class Compare, class Alloc>
+class map;
+
 template<class T>
 class Node {
+	friend class BinaryTree<T>;
+	template<class K, class V, class Compare, class Alloc>
+	friend class ft::map;
+	friend class NodeIterator<T>;
+	friend class NodeConstIterator<T>;
+
 
 private:
 	typedef char	int8_t;
@@ -245,10 +258,6 @@ protected:
 	int8_t balance_factor;
 
 public:
-	//operator Node<const T>() {
-		//return Node<const T>(data, left, right, parent, balance_factor);
-	//}
-
 	Node(T t, Node* my_parent = 0, Node* my_left = 0, Node* my_right = 0, int8_t my_balance_factor = 0)
 		: data(t)
 		, left(my_left)
@@ -324,16 +333,16 @@ public:
 		if (node == nullptr)
 			return true;
 		if (node->left)
-			ASSERT(node->left->parent == node);
+			MY_ASSERT(node->left->parent == node);
 		if (node->right)
-			ASSERT(node->right->parent == node);
+			MY_ASSERT(node->right->parent == node);
 		return check_parent(node->left) && check_parent(node->right);
 	}
 
 	static bool check_balance(Node* node) {
 		if (node == nullptr)
 			return true;
-		ASSERT(static_cast<char>(static_cast<int>(length(node->right)) - static_cast<int>(length(node->left))) == node->balance_factor);
+		MY_ASSERT(static_cast<char>(static_cast<int>(length(node->right)) - static_cast<int>(length(node->left))) == node->balance_factor);
 		if (!(node->balance_factor == 0 || node->balance_factor == 1 || node->balance_factor == -1))
 			return false;
 		return check_balance(node->left) && check_balance(node->right);
@@ -402,7 +411,7 @@ class BinaryTree {
 		root->parent = newRoot;
 		root->balance_factor = root->balance_factor + 1 - ft::min<char>(newRoot->balance_factor, 0);
 		newRoot->balance_factor = newRoot->balance_factor + 1 + ft::max<char>(root->balance_factor, 0);
-		ASSERT(root->parent->right == root);
+		MY_ASSERT(root->parent->right == root);
 		return newRoot;
 	}
 	// returns a new root for the tree, this function should only be called if
