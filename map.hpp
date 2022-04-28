@@ -9,15 +9,6 @@ namespace ft {
 template<class K, class V, class Compare, class Alloc>
 class map;
 
-template<typename K, typename V, typename Compare, typename Alloc>
-void print_lol(ft::map<K, V, Compare, Alloc> const &map)
-{
-	typename ft::map<K, V, Compare, Alloc>::const_iterator it;
-
-	for (it = map.begin(); it != map.end(); it++)
-		std::cout << it->first << " => " << it->second << std::endl;
-}
-
 // a tree, but with iterators
 template<class K, class V, class Compare = std::less<K>, class Alloc = std::allocator<ft::pair<const K, V> > >
 class map : public BinaryTree<ft::pair<const K, V> >
@@ -431,16 +422,15 @@ private:
 		node_type* temp = node->right;
 		while (temp->left)
 			temp = temp->left;
-		node = update_data(node, temp->data.first, temp->data.second);
-		node->right = begin_erase(node->right, temp->data.first, node_to_delete);
-		return node;
+		this->swap_nodes(node, temp);
+		temp->right = begin_erase(temp->right, node->data.first, node_to_delete);
+		return temp;
 	}
 	// returns a possibly new root for the tree or nullptr
 	// this function takes a node to be deleted and recursively balances its
 	// ancestors
 	// please note that node_to_delete, if not null, does not have any children
 	void end_erase(node_type* node_to_delete) {
-		//std::cout << "end_erase with key " << node_to_delete->data.first << std::endl;
 		if (!node_to_delete->parent)
 			this->_root = nullptr;
 		else
@@ -499,12 +489,7 @@ private:
 		{
 			next = first;
 			next++;
-			std::cout << "deleting " << first->first << std::endl;
 			erase(first);
-			if (next == end())
-			{
-				break;
-			}
 			first = next;
 		}
 	}
@@ -621,12 +606,12 @@ private:
 			oss << node->parent->data.first;
 		else
 			oss << "nullptr";
-		os << node->data.first << " " << node->data.second << " (" << static_cast<int>(node->balance_factor) << ')' << " ---> " << oss.str() << std::endl;
+		os << node->data.first << " " << node->data.second << " (" << static_cast<int>(node->balance_factor) << ')' << " ---> " << oss.str() << "(" << node << ")" << std::endl;
 		pretty_print(node->left, depth + 1, os);
 	}
 	// print the tree
 	void pretty_print(std::ostream& os) const {
-		node_type::pretty_print(this->_root, 0, os);
+		pretty_print(this->_root, 0, os);
 	}
 	static bool check_order(node_type* node) {
 		if (node == nullptr)

@@ -44,7 +44,11 @@ class NodeConstIterator {
 	typedef ft::Node<T>							node_type;
 	typedef ft::BinaryTree<T>					tree_type;
 
+#ifdef FT_TEST
+	public:
+#else
 	protected:
+#endif
 	const tree_type*							_tree;
 	node_type*									_node;
 
@@ -144,7 +148,11 @@ class NodeIterator {
 	typedef ft::Node<T>							node_type;
 	typedef ft::BinaryTree<T>					tree_type;
 
+#ifdef FT_TEST
+	public:
+#else
 	protected:
+#endif
 	tree_type*							_tree;
 	node_type*							_node;
 
@@ -379,6 +387,51 @@ class BinaryTree {
 	node_type*				_first;
 	node_type*				_last;
 	
+
+	static void _swap_neighbors(node_type* n1, node_type* n2) {
+		node_type* n1_parent = n1->parent;
+		bool n1_parent_is_left = n1_parent ? n1_parent->left == n1 : false;
+		node_type* n2_parent = n2->parent;
+		bool n2_parent_is_left = n2->parent ? n2_parent->left == n2 : false;
+		node_type* n1_left = n1->left;
+		node_type* n1_right = n1->right;
+		node_type* n2_left = n2->left;
+		node_type* n2_right = n2->right;
+		if (n1_parent) {
+			if (n1_parent_is_left)
+				n1_parent->left = n2;
+			else
+				n1_parent->right = n2;
+		}
+		if (n2_parent) {
+			if (n2_parent_is_left)
+				n2_parent->left = n1;
+			else
+				n2_parent->right = n1;
+		}
+		if (n1_left)
+			n1_left->parent = n2;
+		if (n1_right)
+			n1_right->parent = n2;
+		if (n2_left)
+			n2_left->parent = n1;
+		if (n2_right)
+			n2_right->parent = n1;
+	}
+
+	public:
+	// changes the position of two not-null nodes
+	void swap_nodes(node_type* n1, node_type* n2) {
+		if (node_type::is_root(n1) || node_type::is_root(n2))
+			_root = node_type::is_root(n1) ? n2 : n1;
+		_swap_neighbors(n1, n2);
+		ft::swap(n1->parent, n2->parent);
+		ft::swap(n1->left, n2->left);
+		ft::swap(n1->right, n2->right);
+		ft::swap(n1->balance_factor, n2->balance_factor);
+	}
+
+	
 	// returns a new root for the tree
 	static node_type* rotateLeft(node_type* root) {
 		node_type* newRoot = root->right;
@@ -451,14 +504,4 @@ class BinaryTree {
 	// destructor
 	virtual ~BinaryTree() {}
 };
-
-/*template<class K, class V, class Compare, class Alloc>
-bool operator==(const ft::BinaryTree<K, V, Compare, Alloc>& lhs, const ft::BinaryTree<K, V, Compare, Alloc>& rhs) {
-	if ((lhs.size() != rhs.size()))
-		return false;
-	if (lhs.size() == 0)
-		return true;
-	return *lhs.getRoot() == *rhs.getRoot();
-}*/
-
 }
