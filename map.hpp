@@ -45,32 +45,6 @@ class map : public BinaryTree<ft::pair<const K, V> >
 	node_allocator													_allocator;
 	Compare															_compare;
 
-
-	// attention, does not update balance_factor
-	node_type* update_data(node_type* node, const K& k, const V& v) {
-		node_type* new_node = _allocator.allocate(1, node);
-		new (new_node) node_type(value_type(k, v), node->parent,
-				node->left, node->right, node->balance_factor);
-		MY_ASSERT(new_node->data.first == k);
-		MY_ASSERT(new_node->data.second == v);
-		MY_ASSERT(new_node->parent == node->parent);
-		MY_ASSERT(new_node->left == node->left);
-		MY_ASSERT(new_node->right == node->right);
-		if (node_type::is_left_child(node))
-			node->parent->left = new_node;
-		else if (node_type::is_right_child(node))
-			node->parent->right = new_node;
-		else
-			this->_root = new_node;
-		if (node->left)
-			node->left->parent = new_node;
-		if (node->right)
-			node->right->parent = new_node;
-		_allocator.destroy(node);
-		_allocator.deallocate(node, 1);
-		return new_node;
-	}
-
 	public:
 	class value_compare
 	{
@@ -362,9 +336,13 @@ class map : public BinaryTree<ft::pair<const K, V> >
 	}
 
 	iterator insert(iterator hint, const value_type& value) {
-		if (this->_find(value.first) != nullptr)
-			return end();
-		node_type* ret_node = _insert(hint._node, value.first, value.second);
+		node_type* ret_node;
+		if ((ret_node = this->_find(value.first)) != nullptr)
+			return iterator(this, ret_node);
+		if (hint == end())
+			return insert(value).first;
+		else
+			ret_node = _insert(hint._node, value.first, value.second);
 		this->update_first_and_last();
 		return iterator(this, ret_node);
 	}
