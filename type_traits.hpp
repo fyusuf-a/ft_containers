@@ -19,10 +19,15 @@ namespace ft {
 			return v;
 		}
 	};
-	
+
 	template<class T>
 	struct is_integral : public integral_constant<bool, false> {
 		static const bool value = false;
+	};
+
+	template<>
+	struct is_integral<char> : public integral_constant<bool, true> {
+		static const bool value = true;
 	};
 
 	template<>
@@ -79,7 +84,6 @@ namespace ft {
 	struct is_integral<signed long long> : public integral_constant<bool, true> {
 		static const bool value = true;
 	};
-
 } /* namespace ft */
 
 #endif
