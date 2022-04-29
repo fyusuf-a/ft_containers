@@ -1,3 +1,6 @@
+#ifndef TREE_HPP
+#define TREE_HPP
+
 #include "iterator.hpp"
 #include "utility.hpp"
 #include "algorithm.hpp"
@@ -501,3 +504,5 @@ class BinaryTree {
 	virtual ~BinaryTree() {}
 };
 }
+
+#endif
