@@ -48,7 +48,6 @@ class map : public BinaryTree<ft::pair<const K, V> >
 	public:
 	class value_compare
 	{
-		//friend class map;
 		protected:
 		Compare comp;
 
@@ -89,7 +88,6 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		return new_node;
 	}
 
-	// TODO: test
 	public:
 	template<class InputIt>
 	map(InputIt first, InputIt last, const Compare& comp = Compare(), const Alloc& alloc = Alloc())
@@ -118,6 +116,7 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		}
 	}
 
+	private:
 	node_type* _copy_node(node_type* current, node_type* other) {
 		if (!other)
 			return nullptr;
@@ -129,6 +128,7 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		return new_node;
 	}
 
+	public:
 	map(const map& other)
 		: BinaryTree<value_type>()
 		, _size(other._size)
@@ -366,9 +366,9 @@ class map : public BinaryTree<ft::pair<const K, V> >
 	}
 
 #ifdef FT_TEST
-public:
+	public:
 #else
-private:
+	private:
 #endif
 	size_type _erase(const K& key) {
 		node_type* node_to_delete = nullptr;
@@ -430,6 +430,7 @@ private:
 			node_to_delete->parent->right = nullptr;
 		delete node_to_delete;
 	}
+
 	void update_balance_delete(node_type* node) {
 		if (!node)
 			return;
@@ -459,16 +460,11 @@ private:
 		}
 		return;
 	}
+
 	public:
 	void erase(iterator pos)
 	{
 		_erase(pos->first);
-		/*node_type* node_to_delete = nullptr;
-		begin_erase(pos._node, pos._node->data.first, &node_to_delete);
-		assert(node_to_delete != nullptr);
-		this->_size -= 1;
-		this->end_erase(node_to_delete);
-		this->update_first_and_last();*/
 	}
 	// TODO: wrong complexity ?
 	void erase(iterator first, iterator last)
@@ -550,7 +546,6 @@ private:
 		}
 		return end();
 	}
-
 	const_iterator lower_bound(const K& key) const {
 		for (const_iterator it = begin(); it != end(); ++it) {
 			if (!this->_compare(it->first, key))
@@ -566,7 +561,6 @@ private:
 		}
 		return end();
 	}
-
 	const_iterator upper_bound(const K& key) const {
 		for (const_iterator it = begin(); it != end(); ++it) {
 			if (this->_compare(key, it->first))

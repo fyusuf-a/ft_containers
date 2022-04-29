@@ -86,10 +86,12 @@ class vector {
 		}
 
 		// assign
+	private:
 		inline void _assign(size_type count, const T& value) {
 			clear();
 			_insert(begin(), count, value);
 		}
+	public:
 		void assign(size_type count, const T& value) {
 			if (_start <= &value && &value <= _end) {
 				T v = value;

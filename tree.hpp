@@ -25,15 +25,9 @@ template<class T>
 class NodeIterator;
 
 template<class T>
-class BinaryTree;
-
-template<class T>
 class NodeConstIterator {
-	template<class T2>
-	friend class Node;
 	template<class K, class V, class Compare, class Alloc>
 	friend class map;
-	friend class BinaryTree<T>;
 
 	public:
 	typedef bidirectional_iterator_tag			iterator_category;
@@ -125,19 +119,16 @@ class NodeConstIterator {
 	friend bool operator==(const NodeConstIterator<T>& lhs, const NodeConstIterator<T>& rhs) {
 		return lhs._node == rhs._node;
 	}
-
-	friend bool operator!=(const NodeConstIterator<T>& lhs, const NodeConstIterator<T>& rhs) {
-		return !(lhs == rhs);
-	}
+	bool operator!=(const NodeConstIterator<T>& rhs) {
+		return !(*this == rhs);
+}
 };
+
 
 template<class T>
 class NodeIterator {
-	template<class T2>
-	friend class Node;
 	template<class K, class V, class Compare, class Alloc>
 	friend class map;
-	friend class BinaryTree<T>;
 
 	public:
 	typedef bidirectional_iterator_tag			iterator_category;
@@ -233,11 +224,12 @@ class NodeIterator {
 	friend bool operator==(const NodeIterator<T>& lhs, const NodeIterator<T>& rhs) {
 		return lhs._node == rhs._node;
 	}
-
-	friend bool operator!=(const NodeIterator<T>& lhs, const NodeIterator<T>& rhs) {
-		return !(lhs == rhs);
-	}
 };
+
+template<class T>
+bool operator!=(const NodeIterator<T>& lhs, const NodeIterator<T>& rhs) {
+	return !(lhs == rhs);
+}
 
 template<class K, class V, class Compare, class Alloc>
 class map;
@@ -419,7 +411,11 @@ class BinaryTree {
 			n2_right->parent = n1;
 	}
 
+#ifdef FT_TEST
 	public:
+#else
+	protected:
+#endif
 	// changes the position of two not-null nodes
 	void swap_nodes(node_type* n1, node_type* n2) {
 		if (node_type::is_root(n1) || node_type::is_root(n2))
@@ -431,7 +427,7 @@ class BinaryTree {
 		ft::swap(n1->balance_factor, n2->balance_factor);
 	}
 
-	
+	protected:
 	// returns a new root for the tree
 	static node_type* rotateLeft(node_type* root) {
 		node_type* newRoot = root->right;
