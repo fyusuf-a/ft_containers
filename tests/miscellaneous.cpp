@@ -2,16 +2,23 @@
 #include <iterator>
 #include <cassert>
 #include <vector>
-#include "../algorithm.hpp"
-#include "../iterator.hpp"
-#include "../utility.hpp"
 
-#define TEST(i) std::cout << "Test no " << i << std::endl; i++;
+#ifndef STD 
+# define NAMESPACE std
+# include <algorithm>
+# include <iterator>
+# include <utility>
+#else
+# define NAMESPACE ft
+# include "../algorithm.hpp"
+# include "../iterator.hpp"
+# include "../utility.hpp"
+#endif
 
 void test_pair() {
-	ft::pair<int, int> p1(1, 2);
-	ft::pair<int, int> p2(1, 3);
-	ft::pair<int, int> p3(2, 3);
+	NAMESPACE::pair<int, int> p1(1, 2);
+	NAMESPACE::pair<int, int> p2(1, 3);
+	NAMESPACE::pair<int, int> p3(2, 3);
 	assert(p1 < p2);
 	assert(p2 < p3);
 	assert(p1 < p3);
@@ -27,7 +34,7 @@ void test_pair() {
 	assert(!(p1 > p2));
 	assert(!(p2 > p3));
 	assert(!(p1 > p3));
-	ft::pair<int, int> p4(p1);
+	NAMESPACE::pair<int, int> p4(p1);
 	assert(p1 == p4);
 }
 
@@ -40,16 +47,16 @@ void test_reverse_iterator() {
 	std::vector<int>::reverse_iterator reverse;
 
 	std::vector<int>::iterator first = x.end();
-	ft::reverse_iterator<std::vector<int>::iterator > first2(first);
+	NAMESPACE::reverse_iterator<std::vector<int>::iterator > first2(first);
 	std::vector<int>::iterator end = x.begin();
-	ft::reverse_iterator<std::vector<int>::iterator > end2(end);
+	NAMESPACE::reverse_iterator<std::vector<int>::iterator > end2(end);
 
 	for(reverse = x.rbegin(); first2 != end2; ++first2, ++reverse)
 		assert(*reverse == *first2);
 }
 
 bool is_palindrome(std::string s) {
-	return ft::equal(s.begin(), s.end(), s.rbegin());
+	return NAMESPACE::equal(s.begin(), s.end(), s.rbegin());
 }
 
 void test_equal() {
@@ -72,44 +79,40 @@ void test_compare() {
 	assert(std::lexicographical_compare(s3.begin(), s3.end(), s2.begin(), s2.end()));
 	assert(std::lexicographical_compare(s1.begin(), s1.end(), s3.begin(), s3.end()));
 	assert(!std::lexicographical_compare(s3.begin(), s3.end(), s1.begin(), s1.end()));
-	assert(ft::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end()) == std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end()));
-	assert(ft::lexicographical_compare(s2.begin(), s2.end(), s1.begin(), s1.end()) == std::lexicographical_compare(s2.begin(), s2.end(), s1.begin(), s1.end()));
-	assert(ft::lexicographical_compare(s2.begin(), s2.end(), s3.begin(), s3.end()) == std::lexicographical_compare(s2.begin(), s2.end(), s3.begin(), s3.end()));
-	assert(ft::lexicographical_compare(s3.begin(), s3.end(), s2.begin(), s2.end()) == std::lexicographical_compare(s3.begin(), s3.end(), s2.begin(), s2.end()));
-	assert(ft::lexicographical_compare(s1.begin(), s1.end(), s3.begin(), s3.end()) == std::lexicographical_compare(s1.begin(), s1.end(), s3.begin(), s3.end()));
-	assert(ft::lexicographical_compare(s3.begin(), s3.end(), s1.begin(), s1.end()) == std::lexicographical_compare(s3.begin(), s3.end(), s1.begin(), s1.end()));
+	assert(NAMESPACE::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end()) == std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end()));
+	assert(NAMESPACE::lexicographical_compare(s2.begin(), s2.end(), s1.begin(), s1.end()) == std::lexicographical_compare(s2.begin(), s2.end(), s1.begin(), s1.end()));
+	assert(NAMESPACE::lexicographical_compare(s2.begin(), s2.end(), s3.begin(), s3.end()) == std::lexicographical_compare(s2.begin(), s2.end(), s3.begin(), s3.end()));
+	assert(NAMESPACE::lexicographical_compare(s3.begin(), s3.end(), s2.begin(), s2.end()) == std::lexicographical_compare(s3.begin(), s3.end(), s2.begin(), s2.end()));
+	assert(NAMESPACE::lexicographical_compare(s1.begin(), s1.end(), s3.begin(), s3.end()) == std::lexicographical_compare(s1.begin(), s1.end(), s3.begin(), s3.end()));
+	assert(NAMESPACE::lexicographical_compare(s3.begin(), s3.end(), s1.begin(), s1.end()) == std::lexicographical_compare(s3.begin(), s3.end(), s1.begin(), s1.end()));
 }
 
 int main()
 {
+	clock_t t = clock();
+
 	int i = 1;
 
-	/*TEST(i)
-	static_assert(std::is_same< ft::iterator_traits<std::istream_iterator<char> >::iterator_category, std::input_iterator_tag>::value, "An istream_iterator should be an input iterator");*/
+	/*static_assert(std::is_same< NAMESPACE::iterator_traits<std::istream_iterator<char> >::iterator_category, std::input_iterator_tag>::value, "An istream_iterator should be an input iterator");*/
     
-	TEST(i)
 	int* distance = &i;
-	std::iterator_traits<int*>::difference_type dist = ft::distance(distance + 2, distance + 12);
+	std::iterator_traits<int*>::difference_type dist = NAMESPACE::distance(distance + 2, distance + 12);
 	assert(dist == 10);
 
-	/*TEST(i)
-	static_assert(std::is_same< ft::iterator_traits<char*>::value_type, char>::value, "Value type for char* should be char");
+	/*static_assert(std::is_same< NAMESPACE::iterator_traits<char*>::value_type, char>::value, "Value type for char* should be char");
 
-	TEST(i)
-	static_assert(!std::is_same< ft::iterator_traits<char*>::value_type, int>::value, "Value type for char* should not be int");*/
+	static_assert(!std::is_same< NAMESPACE::iterator_traits<char*>::value_type, int>::value, "Value type for char* should not be int");*/
 
-	TEST(i)
 	test_reverse_iterator();
 
-	TEST(i)
 	test_equal();
 
-	TEST(i)
 	test_compare();
 
-	TEST(i)
 	test_pair();
 
+	t = clock() - t;
+	std::cout << "Time: " << ((float)t) / CLOCKS_PER_SEC << " seconds" << std::endl;
     return (0);
 }
 

@@ -1,6 +1,6 @@
 STL.pdf
-tests/miscellaneous
-tests/tree_test
-tests/map
-tests/vector
-
+tests/miscellaneous*
+tests/tree*
+tests/map*
+tests/vector*
+tests/stack*

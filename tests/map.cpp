@@ -199,12 +199,17 @@ void test_count_and_bounds() {
 }
 
 int main() {
+	clock_t t = clock();
+
 	test_constructor();
 	test_miscellaneous();
 	test_iterator();
 	test_swap_and_operator_equal();
 	test_count_and_bounds();
-	std::cout << "OK" << std::endl;
+
+	t = clock() - t;
+	std::cout << "Time: " << ((float)t) / CLOCKS_PER_SEC << " seconds" << std::endl;
+    return 0;
 }
 
 
