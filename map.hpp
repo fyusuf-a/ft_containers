@@ -1,6 +1,8 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include <sstream>
+#include <iostream>
 #include "tree.hpp"
 #include "utility.hpp"
 

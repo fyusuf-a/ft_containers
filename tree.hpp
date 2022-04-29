@@ -4,11 +4,9 @@
 #include "iterator.hpp"
 #include "utility.hpp"
 #include "algorithm.hpp"
-#include <iostream>
 #include <cassert>
-#include <sstream>
-#include <stdexcept>
-#include <cstdlib>
+#include <memory>
+
 #define nullptr 0
 #ifdef FT_TEST
 #define MY_ASSERT(x) assert(x)

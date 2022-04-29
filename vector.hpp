@@ -1,8 +1,6 @@
 #ifndef FT_VECTOR_HPP
 #define FT_VECTOR_HPP
 
-#include <iostream>
-#include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include "iterator.hpp"

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <cstdlib>
 #define FT_TEST
 #include "../map.hpp"
 #define TEST_SIZE 100
