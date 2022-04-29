@@ -104,19 +104,16 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		node_type* this_node = nullptr;
 		for (; it != last; ++it) {
 			this_key = it->first;
-			//std::cout << "this_key: " << this_key << std::endl;
-			this_node = this->_insert(this_node, this_key, it->second);
 			if (it != first && (comp(this_key, last_key) || this_key == last_key))
 				break;
+			this_node = this->_insert(this_node, this_key, it->second);
 			last_key = this_key;
 		}
 		if (it == last) {
 			this->update_first_and_last();
 			return;
 		}
-		it++;
 		for (; it != last; ++it) {
-			//std::cout << "this_key: " << it->first << std::endl;
 			insert(*it);
 		}
 	}
