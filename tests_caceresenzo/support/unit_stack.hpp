@@ -6,7 +6,7 @@
 /*   By: ecaceres <ecaceres@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/29 18:03:51 by ecaceres          #+#    #+#             */
-/*   Updated: 2020/09/29 18:03:51 by ecaceres         ###   ########.fr       */
+/*   Updated: 2022/04/29 15:15:21 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 #  include <stack>
 #  define STACK std::stack
 # else
-#  include <Stack.hpp>
-#  define STACK ft::Stack
+#  include <stack.hpp>
+#  define STACK ft::stack
 # endif
 
 #endif /* UNIT_STACK_HPP_ */
