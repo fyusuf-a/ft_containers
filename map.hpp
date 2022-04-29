@@ -104,6 +104,7 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		node_type* this_node = nullptr;
 		for (; it != last; ++it) {
 			this_key = it->first;
+			//std::cout << "this_key: " << this_key << std::endl;
 			this_node = this->_insert(this_node, this_key, it->second);
 			if (it != first && (comp(this_key, last_key) || this_key == last_key))
 				break;
@@ -114,8 +115,10 @@ class map : public BinaryTree<ft::pair<const K, V> >
 			return;
 		}
 		it++;
-		for (; it != last; ++it)
+		for (; it != last; ++it) {
+			//std::cout << "this_key: " << it->first << std::endl;
 			insert(*it);
+		}
 	}
 
 	node_type* _copy_node(node_type* current, node_type* other) {
@@ -339,10 +342,21 @@ class map : public BinaryTree<ft::pair<const K, V> >
 		node_type* ret_node;
 		if ((ret_node = this->_find(value.first)) != nullptr)
 			return iterator(this, ret_node);
+		bool use_hint = true;
 		if (hint == end())
-			return insert(value).first;
-		else
-			ret_node = _insert(hint._node, value.first, value.second);
+			use_hint = false;
+		node_type* node = hint._node;
+		while (use_hint && node->parent != nullptr)
+		{
+			if ((node_type::is_left_child(node) && !Compare()(value.first, node->parent->data.first))
+				|| (node_type::is_right_child(node) && !Compare()(node->parent->data.first, value.first)))
+			{
+				use_hint = false;
+				break;
+			}
+			node = node->parent;
+		}
+		ret_node = use_hint ? _insert(hint._node, value.first, value.second) : _insert(value.first, value.second);
 		this->update_first_and_last();
 		return iterator(this, ret_node);
 	}

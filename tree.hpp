@@ -84,7 +84,7 @@ class NodeConstIterator {
 		return &(operator*());
 	}
 
-	NodeConstIterator operator++() {
+	NodeConstIterator& operator++() {
 		if (!_node) {
 			_node = _tree->_first;
 			return *this;
@@ -97,7 +97,7 @@ class NodeConstIterator {
 		return *this;
 	}
 
-	NodeConstIterator operator--() {
+	NodeConstIterator& operator--() {
 		if (!_node) {
 			_node = _tree->_last;
 			return *this;
@@ -184,15 +184,15 @@ class NodeIterator {
 		return *this;
 	}
 
-	reference operator*() {
+	reference operator*() const {
 		return _node->data;
 	}
 	
-	pointer operator->() {
+	pointer operator->() const {
 		return &(operator*());
 	}
 
-	NodeIterator operator++() {
+	NodeIterator& operator++() {
 		if (!_node) {
 			_node = _tree->_first;
 			return *this;
@@ -205,7 +205,7 @@ class NodeIterator {
 		return *this;
 	}
 
-	NodeIterator operator--() {
+	NodeIterator& operator--() {
 		if (!_node) {
 			_node = _tree->_last;
 			return *this;
