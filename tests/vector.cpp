@@ -1,4 +1,4 @@
-#ifndef STD 
+#ifdef STD 
 # define NAMESPACE std
 # include <iterator>
 # include <vector>

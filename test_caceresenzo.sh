@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 C_SAME_LINE="\033[1K\r"
 C_RESET="\033[0m"
 

@@ -94,8 +94,6 @@ namespace ft {
 
 
 int main() {
-	clock_t t = clock();
-
 	srand(time(NULL));
 	ft::map<K, V> tree;
 
@@ -142,6 +140,5 @@ int main() {
 		}
 	}
 
-	t = clock() - t;
-	std::cout << "Time: " << ((float)t) / CLOCKS_PER_SEC << " seconds" << std::endl;
+	std::cout << "OK" << std::endl;
 }

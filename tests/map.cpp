@@ -1,12 +1,22 @@
 #define FT_TEST
-#include "../map.hpp"
-#include "../utility.hpp"
+#ifdef STD
+# define NAMESPACE std
+# include <map>
+# include <utility>
+#else
+# define NAMESPACE ft
+# include "../map.hpp"
+# include "../utility.hpp"
+#endif
 #include <functional>
 #include <stdexcept>
+#include <stdlib.h>
+#include <cassert>
+#include <iostream>
 
 void test_miscellaneous() {
-	ft::map<int, std::string> m;
-	m.insert(ft::pair<const int, std::string>(0, "hello"));
+	NAMESPACE::map<int, std::string> m;
+	m.insert(NAMESPACE::pair<const int, std::string>(0, "hello"));
 	try {
 		m.at(1);
 		throw std::out_of_range("Index out of bounds");
@@ -17,26 +27,26 @@ void test_miscellaneous() {
 	assert(m.at(1) == "");
 
 	// Testing iterators
-	ft::map<int, size_t> my_map;
+	NAMESPACE::map<int, size_t> my_map;
 	for (int i = 0; i < 10; i++) {
-		my_map.insert(ft::pair<const int, size_t>(i, i));
+		my_map.insert(NAMESPACE::pair<const int, size_t>(i, i));
 	}
 
-	ft::map<int, size_t>::const_iterator my_it = my_map.begin();
+	NAMESPACE::map<int, size_t>::const_iterator my_it = my_map.begin();
 	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
 		assert(static_cast<size_t>(my_it->first) == my_it->second);
 	}
 
-	ft::map<int, size_t> m1;
+	NAMESPACE::map<int, size_t> m1;
 	for (int i = 0; i < 10; i++) {
-		m1.insert(ft::pair<const int, size_t>(i, i));
+		m1.insert(NAMESPACE::pair<const int, size_t>(i, i));
 	}
-	ft::map<int, size_t, std::greater<size_t> > m2;
+	NAMESPACE::map<int, size_t, std::greater<size_t> > m2;
 	for (int i = 0; i < 10; i++) {
-		m2.insert(ft::pair<const int, size_t>(i, i));
+		m2.insert(NAMESPACE::pair<const int, size_t>(i, i));
 	}
-	ft::map<int, size_t>::reverse_iterator it = m1.rbegin();
-	ft::map<int, size_t, std::greater<size_t> >::iterator jt = m2.begin();
+	NAMESPACE::map<int, size_t>::reverse_iterator it = m1.rbegin();
+	NAMESPACE::map<int, size_t, std::greater<size_t> >::iterator jt = m2.begin();
 	for (; it != m1.rend(); it++, jt++) {
 		assert(jt != m2.end());
 		assert(it->first == jt->first);
@@ -71,7 +81,7 @@ void test_miscellaneous() {
 	assert(m1.size() == 8);
 	m1.clear();
 	assert(m1.size() == 0);
-	for (ft::map<int, size_t>::iterator it = m1.begin(); it != m1.end(); it++) {
+	for (NAMESPACE::map<int, size_t>::iterator it = m1.begin(); it != m1.end(); it++) {
 		assert(false);
 	}
 
@@ -90,18 +100,18 @@ void test_miscellaneous() {
 }
 
 void test_swap_and_operator_equal() {
-	ft::map<int, size_t> m1;
-	ft::map<int, size_t> m2;
-	m1.insert(ft::pair<const int, size_t>(0, 6));
+	NAMESPACE::map<int, size_t> m1;
+	NAMESPACE::map<int, size_t> m2;
+	m1.insert(NAMESPACE::pair<const int, size_t>(0, 6));
 	m1.swap(m2);
 	assert(m1.size() == 0);
 	assert(m2.size() == 1);
 	assert(m2.find(0)->second == 6);
 
 	m2.clear();
-	m2.insert(ft::pair<const int, size_t>(1, 1));
-	m2.insert(ft::pair<const int, size_t>(2, 2));
-	m2.insert(ft::pair<const int, size_t>(3, 3));
+	m2.insert(NAMESPACE::pair<const int, size_t>(1, 1));
+	m2.insert(NAMESPACE::pair<const int, size_t>(2, 2));
+	m2.insert(NAMESPACE::pair<const int, size_t>(3, 3));
 	m1 = m2;
 	assert(m1.size() == 3);
 	assert(m1.find(1)->second == 1);
@@ -112,11 +122,11 @@ void test_swap_and_operator_equal() {
 
 void test_constructor() {
 	// Testing constructor...
-	ft::map<int, size_t> m;
+	NAMESPACE::map<int, size_t> m;
 	assert(m.size() == 0);
 
 	for (int i = 0; i < 10; i++) {
-		m.insert(ft::pair<int, size_t>(i, i));
+		m.insert(NAMESPACE::pair<int, size_t>(i, i));
 	}
 	assert(m.size() == 10);
 	for (int i = 0; i < 10; i++) {
@@ -124,40 +134,40 @@ void test_constructor() {
 		assert(static_cast<int>(m[i]) == i);
 	}
 	int i = 0;
-	for (ft::map<int, size_t>::iterator it = m.begin(); it != m.end(); i++) {
+	for (NAMESPACE::map<int, size_t>::iterator it = m.begin(); it != m.end(); i++) {
 		assert(static_cast<int>(it->second) == i);
 		it++;
 	}
 
-	ft::map<int, size_t, std::greater<int> > m2;
+	NAMESPACE::map<int, size_t, std::greater<int> > m2;
 	assert(m2.size() == 0);
 
 	for (int i = 0; i < 10; i++) {
-		m2.insert(ft::pair<int, size_t>(i, i));
+		m2.insert(NAMESPACE::pair<int, size_t>(i, i));
 	}
 	assert(m2.size() == 10);
 	for (int i = 0; i < 10; i++) {
 		assert(static_cast<int>(m2.at(i)) == i);
 	}
 	i = 0;
-	for (ft::map<int, size_t, std::greater<int> >::iterator it = m2.begin(); it != m2.end(); it++, i++) {
+	for (NAMESPACE::map<int, size_t, std::greater<int> >::iterator it = m2.begin(); it != m2.end(); it++, i++) {
 		assert(static_cast<int>(it->second) == 9 - i);
 	}
 
 	// Testing constructor with iterators
-	ft::map<int, size_t> m3(m.begin(), m.end());
+	NAMESPACE::map<int, size_t> m3(m.begin(), m.end());
 
 	assert(m3.size() == m.size());
-	for (ft::map<int, size_t>::iterator it = m3.begin(), jt = m.begin(); it != m3.end(); it++, jt++) {
+	for (NAMESPACE::map<int, size_t>::iterator it = m3.begin(), jt = m.begin(); it != m3.end(); it++, jt++) {
 		assert(it->second == jt->second);
 		assert(it->first == jt->first);
 		assert(&*it != &*jt);
 	}
 
 	// Testing copy constructor
-	ft::map<int, size_t> m4(m);
+	NAMESPACE::map<int, size_t> m4(m);
 	assert(m4.size() == m.size());
-	for (ft::map<int, size_t>::iterator it = m4.begin(), jt = m.begin(); it != m4.end(); it++, jt++) {
+	for (NAMESPACE::map<int, size_t>::iterator it = m4.begin(), jt = m.begin(); it != m4.end(); it++, jt++) {
 		assert(it->second == jt->second);
 		assert(it->first == jt->first);
 		assert(&*it != &*jt);
@@ -165,12 +175,12 @@ void test_constructor() {
 }
 
 void test_iterator() {
-	ft::map<int, size_t> my_map;
+	NAMESPACE::map<int, size_t> my_map;
 	for (int i = 0; i < 10; i++) {
-		my_map.insert(ft::pair<int, size_t>(i, i));
+		my_map.insert(NAMESPACE::pair<int, size_t>(i, i));
 	}
 
-	ft::map<int, size_t>::iterator my_it = my_map.begin();
+	NAMESPACE::map<int, size_t>::iterator my_it = my_map.begin();
 	for (my_it = my_map.begin(); my_it != my_map.end(); ++my_it) {
 		assert(static_cast<size_t>(my_it->first) == my_it->second);
 		my_it->second = my_it->second + 1;
@@ -178,7 +188,7 @@ void test_iterator() {
 }
 
 void test_count_and_bounds() {
-	ft::map <int, size_t> m;
+	NAMESPACE::map <int, size_t> m;
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 15; j++) {
 			if (j < i) {
@@ -190,7 +200,7 @@ void test_count_and_bounds() {
 				assert(m.find(j) == m.end());
 			}
 		}
-		m.insert(ft::pair<int, size_t>(i, i));
+		m.insert(NAMESPACE::pair<int, size_t>(i, i));
 	}
 	assert(m.lower_bound(5) == m.find(5));
 	assert(m.upper_bound(5) == m.find(6));
@@ -198,8 +208,18 @@ void test_count_and_bounds() {
 	assert(m.upper_bound(9) == m.end());
 }
 
-int main() {
+int main(int argc, char** argv) {
+	if (argc != 2)
+	{
+		std::cerr << "Usage: ./test seed" << std::endl;
+		std::cerr << "Provide a seed please" << std::endl;
+		//std::cerr << "Count value:" << COUNT << std::endl;
+		return 1;
+	}
 	clock_t t = clock();
+
+	const int seed = atoi(argv[1]);
+	srand(seed);
 
 	test_constructor();
 	test_miscellaneous();

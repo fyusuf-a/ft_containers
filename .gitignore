@@ -4,3 +4,4 @@ tests/tree*
 tests/map*
 tests/vector*
 tests/stack*
+tests/intra-main*
