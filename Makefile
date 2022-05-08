@@ -5,7 +5,7 @@ EXECS = $(SRCS:.cpp=)
 EXECS_STD = $(SRCS:.cpp=_std)
 
 CFLAGS = -Werror -Wextra -Wall --std=c++98
-CC	= clang++
+CC	= c++
 
 all:		$(EXECS) $(EXECS_STD)
 
